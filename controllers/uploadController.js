@@ -73,10 +73,12 @@ exports.uploadImage = async (req, res) => {
     // 1. If Cloud Storage (Cloudinary) is configured in environment, upload to Cloud
     const cloudStorage = require('../services/cloudStorageService');
     const isCloudConfigured = cloudStorage.isCloudStorageConfigured();
+    const isProduction = process.env.NODE_ENV === 'production' || Boolean(process.env.VERCEL);
 
     if (isCloudConfigured) {
       try {
         const cloudResult = await cloudStorage.uploadToCloud(image, 'clicktopya');
+        console.log('[Upload] Image uploaded successfully to Cloudinary:', cloudResult.url);
         return res.status(201).json({
           success: true,
           url: cloudResult.url,
@@ -84,20 +86,21 @@ exports.uploadImage = async (req, res) => {
           publicId: cloudResult.public_id
         });
       } catch (cloudErr) {
-        console.error('[Upload] Cloudinary upload error:', cloudErr);
-        if (process.env.VERCEL) {
-          return res.status(500).json({
-            message: `فشل رفع الصورة إلى Cloudinary: ${cloudErr.message}`
-          });
-        }
+        console.error('[Upload] Cloudinary upload error:', cloudErr.message);
+        return res.status(500).json({
+          message: `فشل رفع الصورة إلى Cloudinary: ${cloudErr.message}`
+        });
       }
-    } else if (process.env.VERCEL) {
+    }
+
+    // If we are in production (e.g. Vercel) and Cloudinary is NOT configured, block local file storage
+    if (isProduction) {
       return res.status(500).json({
-        message: 'إعدادات Cloudinary غير مكتملة في Vercel (CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET).'
+        message: 'إعدادات التخزين السحابي Cloudinary غير مهيأة في بيئة الإنتاج (يرجى ضبط CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET).'
       });
     }
 
-    // 2. Local filesystem storage (Local / development)
+    // 2. Local filesystem storage ONLY in local development
     const randomHex = crypto.randomBytes(8).toString('hex');
     const fileName = `img-${Date.now()}-${randomHex}.${ext}`;
     const filePath = path.join(UPLOADS_DIR, fileName);
@@ -116,4 +119,28 @@ exports.uploadImage = async (req, res) => {
     console.error('Upload error:', error);
     res.status(500).json({ message: error.message || 'حدث خطأ أثناء رفع الصورة، يرجى المحاولة مرة أخرى' });
   }
+};
+
+/**
+ * GET /api/upload/status
+ * Diagnostic endpoint to verify Cloudinary configuration
+ */
+exports.getUploadStatus = (req, res) => {
+  const cloudStorage = require('../services/cloudStorageService');
+  const configured = cloudStorage.isCloudStorageConfigured();
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME ? `${process.env.CLOUDINARY_CLOUD_NAME.slice(0, 3)}***` : 'NOT_SET';
+  const hasKey = Boolean(process.env.CLOUDINARY_API_KEY);
+  const hasSecret = Boolean(process.env.CLOUDINARY_API_SECRET);
+
+  res.json({
+    status: 'ok',
+    storageMode: configured ? 'cloudinary' : 'local',
+    isProduction: process.env.NODE_ENV === 'production' || Boolean(process.env.VERCEL),
+    cloudinary: {
+      isConfigured: configured,
+      cloudNamePrefix: cloudName,
+      hasApiKey: hasKey,
+      hasApiSecret: hasSecret
+    }
+  });
 };

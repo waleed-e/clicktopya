@@ -277,6 +277,11 @@
         }
 
         async function saveCategory() {
+            if (categoryDropUploader && categoryDropUploader.isUploading) {
+                alert('جاري رفع الصورة إلى الخادم، يرجى الانتظار بضع ثوانٍ حتى تنتهي عملية الرفع...');
+                return;
+            }
+
             const id = document.getElementById('categoryId').value;
             const name = document.getElementById('categoryName').value.trim();
 
@@ -285,10 +290,12 @@
                 return;
             }
 
+            const imgValue = categoryDropUploader ? categoryDropUploader.getValue() : (document.getElementById('categoryImage')?.value || '');
+
             const categoryData = {
                 name,
                 description: document.getElementById('categoryDescription').value.trim(),
-                image: document.getElementById('categoryImage').value
+                image: imgValue
             };
 
             try {

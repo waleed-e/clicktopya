@@ -1,101 +1,64 @@
-const https = require('https');
-const crypto = require('crypto');
+const cloudinary = require('cloudinary').v2;
 
 /**
  * Cloud Storage Service
- * Supports Cloudinary out of the box using pure HTTPS REST API (zero extra npm dependencies).
- * Required environment variables for Cloudinary:
+ * Uses official Cloudinary SDK.
+ * Reads environment variables:
  *   CLOUDINARY_CLOUD_NAME
  *   CLOUDINARY_API_KEY
  *   CLOUDINARY_API_SECRET
- * 
- * If Cloudinary is not configured, returns null so the caller can fallback to local storage.
  */
 
-function isCloudStorageConfigured() {
-  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-  const apiKey = process.env.CLOUDINARY_API_KEY;
-  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+function getCloudinaryConfig() {
+  const cloud_name = (process.env.CLOUDINARY_CLOUD_NAME || '').trim();
+  const api_key = (process.env.CLOUDINARY_API_KEY || '').trim();
+  const api_secret = (process.env.CLOUDINARY_API_SECRET || '').trim();
 
-  return Boolean(cloudName && apiKey && apiSecret);
+  return { cloud_name, api_key, api_secret };
+}
+
+function isCloudStorageConfigured() {
+  const { cloud_name, api_key, api_secret } = getCloudinaryConfig();
+  return Boolean(cloud_name && api_key && api_secret);
 }
 
 /**
- * Uploads a base64 or DataURL image to Cloudinary securely.
- * @param {string} dataUrl - e.g. "data:image/png;base64,..."
- * @param {string} folder - optional folder name, default "clicktopya"
+ * Uploads an image (Data URI or Base64 or URL) to Cloudinary.
+ * @param {string} fileData - e.g. "data:image/png;base64,..."
+ * @param {string} folder - default "clicktopya"
  * @returns {Promise<{ url: string, public_id: string }>}
  */
-async function uploadToCloud(dataUrl, folder = 'clicktopya') {
-  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-  const apiKey = process.env.CLOUDINARY_API_KEY;
-  const apiSecret = process.env.CLOUDINARY_API_SECRET;
-
-  if (!cloudName || !apiKey || !apiSecret) {
-    throw new Error('Cloud storage is not configured. Missing CLOUDINARY credentials.');
+async function uploadToCloud(fileData, folder = 'clicktopya') {
+  const config = getCloudinaryConfig();
+  if (!config.cloud_name || !config.api_key || !config.api_secret) {
+    throw new Error('Cloudinary environment variables (CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET) are missing or incomplete.');
   }
 
-  const timestamp = Math.floor(Date.now() / 1000);
-
-  // Generate SHA1 signature required by Cloudinary API
-  // Parameter string sorted alphabetically: "folder={folder}&timestamp={timestamp}{api_secret}"
-  const toSign = `folder=${folder}&timestamp=${timestamp}${apiSecret}`;
-  const signature = crypto.createHash('sha1').update(toSign).digest('hex');
-
-  const postData = JSON.stringify({
-    file: dataUrl,
-    timestamp,
-    api_key: apiKey,
-    signature,
-    folder
+  cloudinary.config({
+    cloud_name: config.cloud_name,
+    api_key: config.api_key,
+    api_secret: config.api_secret,
+    secure: true
   });
 
-  return new Promise((resolve, reject) => {
-    const options = {
-      hostname: 'api.cloudinary.com',
-      port: 443,
-      path: `/v1_1/${cloudName}/image/upload`,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(postData)
-      },
-      timeout: 30000
+  try {
+    const result = await cloudinary.uploader.upload(fileData, {
+      folder,
+      resource_type: 'image'
+    });
+
+    if (!result || !result.secure_url) {
+      throw new Error('Cloudinary upload returned no secure_url');
+    }
+
+    return {
+      url: result.secure_url,
+      public_id: result.public_id
     };
-
-    const req = https.request(options, (res) => {
-      let body = '';
-      res.on('data', (chunk) => { body += chunk; });
-      res.on('end', () => {
-        try {
-          const parsed = JSON.parse(body);
-          if (res.statusCode >= 200 && res.statusCode < 300 && parsed.secure_url) {
-            resolve({
-              url: parsed.secure_url,
-              public_id: parsed.public_id
-            });
-          } else {
-            const errMsg = parsed.error?.message || `Cloudinary upload failed with status ${res.statusCode}`;
-            reject(new Error(errMsg));
-          }
-        } catch (err) {
-          reject(new Error(`Failed to parse cloud response: ${err.message}`));
-        }
-      });
-    });
-
-    req.on('error', (err) => {
-      reject(new Error(`Network error uploading to cloud: ${err.message}`));
-    });
-
-    req.on('timeout', () => {
-      req.destroy();
-      reject(new Error('Upload to cloud timed out after 30 seconds'));
-    });
-
-    req.write(postData);
-    req.end();
-  });
+  } catch (err) {
+    console.error('[Cloudinary SDK Error]', err);
+    throw new Error(`Cloudinary upload failed: ${err.message || err}`);
+  }
 }
 
 module.exports = {

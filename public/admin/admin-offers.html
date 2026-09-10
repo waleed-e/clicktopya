@@ -698,6 +698,11 @@
 
         async function saveOffer(e) {
             e.preventDefault();
+            if (offerDropUploader && offerDropUploader.isUploading) {
+                showAdminToast('جاري رفع الصورة إلى الخادم، يرجى الانتظار ثوانٍ معدودة...');
+                return;
+            }
+
             const id = document.getElementById('offerId').value;
             const startVal = document.getElementById('offerStartDate').value;
             const endVal = document.getElementById('offerEndDate').value;
@@ -707,11 +712,13 @@
                 return;
             }
 
+            const imgValue = offerDropUploader ? offerDropUploader.getValue() : (document.getElementById('offerImage')?.value || '');
+
             const payload = {
                 title: document.getElementById('offerTitle').value,
                 description: document.getElementById('offerDescription').value,
                 discount: document.getElementById('offerDiscount').value,
-                image: document.getElementById('offerImage').value,
+                image: imgValue,
                 startDate: new Date(startVal),
                 endDate: new Date(endVal),
                 ctaText: document.getElementById('offerCtaText').value,

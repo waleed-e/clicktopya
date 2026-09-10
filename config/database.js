@@ -65,11 +65,20 @@ function logConnectFailure(err) {
   }
 }
 
+let cached = global.mongoose;
+
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
 /**
- * Connect to MongoDB and resolve only after the driver is ready.
- * Rejects on failure so the HTTP server is not started against a dead connection.
+ * Connect to MongoDB with caching for serverless environments (e.g. Vercel).
  */
 async function connectDB() {
+  if (cached.conn) {
+    return cached.conn;
+  }
+
   const rawUri = process.env.MONGODB_URI || process.env.MONGO_URI;
   if (!rawUri) {
     throw new Error('Neither MONGODB_URI nor MONGO_URI is set in environment');
@@ -77,21 +86,30 @@ async function connectDB() {
 
   const uri = normalizeMongoUri(rawUri);
 
-  const options = {
-    serverSelectionTimeoutMS: 30000,
-    socketTimeoutMS: 45000,
-    retryWrites: true,
-    bufferCommands: false,
-  };
+  if (!cached.promise) {
+    const options = {
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+      retryWrites: true,
+      bufferCommands: false,
+    };
+
+    cached.promise = mongoose.connect(uri, options).then((mongooseInstance) => {
+      console.log(
+        `Database connected successfully (db=${mongooseInstance.connection.name}, host=${mongooseInstance.connection.host})`
+      );
+      return mongooseInstance.connection;
+    }).catch((err) => {
+      cached.promise = null;
+      logConnectFailure(err);
+      throw err;
+    });
+  }
 
   try {
-    await mongoose.connect(uri, options);
-    console.log(
-      `Database connected successfully (db=${mongoose.connection.name}, host=${mongoose.connection.host})`
-    );
-    return mongoose.connection;
+    cached.conn = await cached.promise;
+    return cached.conn;
   } catch (err) {
-    logConnectFailure(err);
     throw err;
   }
 }

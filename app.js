@@ -9,12 +9,25 @@ const offerRoutes = require('./routes/offerRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const pageRoutes = require('./routes/pageRoutes');
 
+const connectDB = require('./config/database');
+
 const app = express();
 
 app.use(cors());
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 app.use(express.static('public'));
+
+// Ensure DB is connected for serverless calls on Vercel
+app.use('/api', async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error('Database connection failed in middleware:', err.message);
+    res.status(500).json({ message: 'فشل الاتصال بقاعدة البيانات: ' + err.message });
+  }
+});
 
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);

@@ -13,7 +13,11 @@ async function start() {
   });
 }
 
-start().catch((err) => {
-  console.error('Failed to start server:', err.message);
-  process.exit(1);
-});
+// In local development or standalone server, start the HTTP server
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  start().catch((err) => {
+    console.error('Failed to start server:', err.message);
+  });
+}
+
+module.exports = app;

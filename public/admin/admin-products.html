@@ -385,6 +385,11 @@
         }
 
         async function saveProduct() {
+            if (productDropUploader && productDropUploader.isUploading) {
+                alert('جاري رفع الصورة إلى الخادم، يرجى الانتظار بضع ثوانٍ حتى تنتهي عملية الرفع...');
+                return;
+            }
+
             const id = document.getElementById('productId').value;
             const name = document.getElementById('productName').value.trim();
             const price = parseFloat(document.getElementById('productPrice').value);
@@ -403,12 +408,14 @@
                 return;
             }
 
+            const imgValue = productDropUploader ? productDropUploader.getValue() : (document.getElementById('productImage')?.value || '');
+
             const productData = {
                 name,
                 description: document.getElementById('productDescription').value.trim(),
                 price,
                 Quantity: parseInt(document.getElementById('productQuantity').value) || 0,
-                imgpath: document.getElementById('productImage').value,
+                imgpath: imgValue,
                 categoryName
             };
 

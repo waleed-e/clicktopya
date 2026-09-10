@@ -72,7 +72,9 @@ exports.uploadImage = async (req, res) => {
 
     // 1. If Cloud Storage (Cloudinary) is configured in environment, upload to Cloud
     const cloudStorage = require('../services/cloudStorageService');
-    if (cloudStorage.isCloudStorageConfigured()) {
+    const isCloudConfigured = cloudStorage.isCloudStorageConfigured();
+
+    if (isCloudConfigured) {
       try {
         const cloudResult = await cloudStorage.uploadToCloud(image, 'clicktopya');
         return res.status(201).json({
@@ -82,11 +84,20 @@ exports.uploadImage = async (req, res) => {
           publicId: cloudResult.public_id
         });
       } catch (cloudErr) {
-        console.warn('[Upload] Cloud upload attempt failed, falling back to local storage:', cloudErr.message);
+        console.error('[Upload] Cloudinary upload error:', cloudErr);
+        if (process.env.VERCEL) {
+          return res.status(500).json({
+            message: `فشل رفع الصورة إلى Cloudinary: ${cloudErr.message}`
+          });
+        }
       }
+    } else if (process.env.VERCEL) {
+      return res.status(500).json({
+        message: 'إعدادات Cloudinary غير مكتملة في Vercel (CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET).'
+      });
     }
 
-    // 2. Local filesystem storage (Local / development or fallback)
+    // 2. Local filesystem storage (Local / development)
     const randomHex = crypto.randomBytes(8).toString('hex');
     const fileName = `img-${Date.now()}-${randomHex}.${ext}`;
     const filePath = path.join(UPLOADS_DIR, fileName);
@@ -103,6 +114,6 @@ exports.uploadImage = async (req, res) => {
     });
   } catch (error) {
     console.error('Upload error:', error);
-    res.status(500).json({ message: 'حدث خطأ أثناء رفع الصورة، يرجى المحاولة مرة أخرى' });
+    res.status(500).json({ message: error.message || 'حدث خطأ أثناء رفع الصورة، يرجى المحاولة مرة أخرى' });
   }
 };

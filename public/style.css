@@ -1,0 +1,490 @@
+/* Clicktopya Modern Stylesheet */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+html, body {
+    font-family: 'Tajawal', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: #f8fafc;
+    color: #1e293b;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #dc2626;
+}
+
+/* Navbar */
+.navbar {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: white;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 20px -2px rgba(220, 38, 38, 0.25);
+}
+
+.navbar-scrolled {
+    background: rgba(220, 38, 38, 0.95) !important;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.18);
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.cart-badge {
+    background: white;
+    color: #dc2626;
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 800;
+    margin-inline-start: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease;
+}
+
+.cart-badge.bump {
+    transform: scale(1.3);
+}
+
+/* Modals */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1100;
+    inset: 0;
+    background-color: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.modal.open,
+.modal[style*="flex"] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+}
+
+.modal-content {
+    transform: scale(0.95) translateY(10px);
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal.open .modal-content {
+    transform: scale(1) translateY(0);
+}
+
+/* Animations */
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(22px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulseGlow {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 0 12px rgba(37, 211, 102, 0);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.skeleton-shimmer {
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+.card-enter {
+    animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Interactive Buttons */
+.btn-hover {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px -3px rgba(220, 38, 38, 0.35);
+}
+
+.btn-hover:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.btn-whatsapp-pulse {
+    animation: pulseGlow 2.5s infinite;
+}
+
+.btn-whatsapp-pulse:hover {
+    animation: none;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 10px 25px -4px rgba(37, 211, 102, 0.4);
+}
+
+/* Product & Category Cards */
+.product-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.08), 0 10px 15px -3px rgba(0, 0, 0, 0.04);
+}
+
+.category-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px -8px rgba(220, 38, 38, 0.15);
+}
+
+/* Language Switcher */
+.lang-btn {
+    transition: all 0.2s ease;
+}
+
+.lang-btn.active {
+    background: white;
+    color: #dc2626;
+    font-weight: 800;
+}
+
+/* Logo Fallback Handling */
+.logo-fallback {
+    display: none;
+}
+
+.logo-img.is-hidden {
+    display: none !important;
+}
+
+.logo-img.is-hidden ~ .logo-fallback {
+    display: inline-block;
+}
+
+/* ========================================================
+   Laptop Stickers & Customization Specific Styling
+   ======================================================== */
+@keyframes stickerFloat {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-8px) rotate(1.5deg);
+    }
+}
+
+.animate-sticker-float {
+    animation: stickerFloat 4s ease-in-out infinite;
+}
+
+.sticker-tape {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    border-left: 2px dashed rgba(200, 200, 200, 0.6);
+    border-right: 2px dashed rgba(200, 200, 200, 0.6);
+    z-index: 20;
+    pointer-events: none;
+}
+
+.sticker-card {
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+}
+
+.sticker-card:hover {
+    transform: translateY(-8px) scale(1.02) rotate(0deg) !important;
+    box-shadow: 0 25px 35px -10px rgba(220, 38, 38, 0.18), 0 10px 20px -5px rgba(0, 0, 0, 0.08);
+}
+
+.sticker-white-border {
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.15));
+}
+
+.dashed-cutline {
+    border: 2px dashed #f87171;
+    border-radius: 1.5rem;
+}
+
+/* Laptop Mockup Back for Visual Size Preview */
+.laptop-mockup-back {
+    background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+    border: 3px solid #334155;
+    border-radius: 1.25rem;
+    position: relative;
+    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.1), 0 20px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+.laptop-apple-logo {
+    opacity: 0.18;
+}
+
+.custom-sticker-preview-box {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ========================================================
+   Brand Logo - Clean & Circular
+   ======================================================== */
+.brand-logo-circle {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1.5px solid rgba(255, 255, 255, 0.28);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transition: all 0.25s ease;
+}
+
+.brand-logo-circle:hover {
+    transform: scale(1.05);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+}
+
+/* ========================================================
+   Hero Section - Subtle Branded Logo Background Watermark
+   ======================================================== */
+.hero-logo-watermark {
+    position: absolute;
+    top: 50%;
+    right: 5%;
+    transform: translateY(-50%) rotate(-12deg);
+    width: 380px;
+    height: 380px;
+    opacity: 0.08;
+    pointer-events: none;
+    z-index: 1;
+    filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.3));
+    mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
+    -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
+}
+
+@media (max-width: 768px) {
+    .hero-logo-watermark {
+        width: 260px;
+        height: 260px;
+        right: -10%;
+        opacity: 0.06;
+    }
+}
+
+/* ========================================================
+   Modern Non-Blocking Toast Notification System
+   ======================================================== */
+#toastContainer {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-width: 380px;
+    width: calc(100% - 3rem);
+    pointer-events: none;
+}
+
+[dir="rtl"] #toastContainer {
+    left: 1.5rem;
+    right: auto;
+}
+
+.toast-item {
+    pointer-events: auto;
+    background: #0f172a;
+    color: white;
+    padding: 0.9rem 1.25rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.toast-item.toast-show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.toast-item.toast-hide {
+    transform: translateY(10px) scale(0.95);
+    opacity: 0;
+}
+
+.toast-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.85rem;
+}
+
+.toast-success .toast-icon {
+    background: #10b981;
+    color: white;
+}
+
+.toast-error .toast-icon {
+    background: #ef4444;
+    color: white;
+}
+
+.toast-info .toast-icon {
+    background: #3b82f6;
+    color: white;
+}
+
+/* ========================================================
+   Modern Latest Offers Cards
+   ======================================================== */
+.offer-card {
+    background: white;
+    border-radius: 1.75rem;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.offer-card:hover {
+    transform: translateY(-5px);
+    border-color: #fca5a5;
+    box-shadow: 0 20px 25px -5px rgba(220, 38, 38, 0.12), 0 8px 10px -6px rgba(220, 38, 38, 0.08);
+}
+
+.discount-ribbon {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: white;
+    font-weight: 900;
+    font-size: 0.75rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    z-index: 10;
+}
+
+[dir="rtl"] .discount-ribbon {
+    left: auto;
+    right: 1rem;
+}
+
+/* ========================================================
+   Brand Logo Circle — Navbar & Footer
+   ======================================================== */
+.brand-logo-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    flex-shrink: 0;
+}
+
+.brand-logo-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+}
+
+/* ========================================================
+   Hero Logo Watermark
+   ======================================================== */
+.hero-logo-watermark {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.06;
+    overflow: hidden;
+}
+
+.hero-logo-watermark img {
+    width: min(500px, 70%);
+    height: auto;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    user-select: none;
+}

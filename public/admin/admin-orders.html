@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الطلبات | Clicktopya</title>
+    <link rel="icon" type="image/png" href="/logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Tajawal', sans-serif; background: #f3f4f6; }
+        .admin-container { display: flex; min-height: 100vh; }
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #1e1e2f 0%, #2d2d3a 100%);
+            color: white;
+            position: fixed;
+            height: 100vh;
+        }
+        .sidebar-header { padding: 1.5rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-header h2 { font-size: 1.5rem; }
+        .sidebar-menu { padding: 1.5rem 0; }
+        .menu-item {
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #e5e7eb;
+            text-decoration: none;
+        }
+        .menu-item:hover, .menu-item.active { background: rgba(220,38,38,0.2); color: #dc2626; border-right: 3px solid #dc2626; }
+        .main-content { flex: 1; margin-right: 280px; padding: 2rem; }
+        .top-bar {
+            background: white;
+            border-radius: 15px;
+            padding: 1rem 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .table-container { background: white; border-radius: 15px; padding: 1.5rem; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1rem; text-align: right; border-bottom: 1px solid #e5e7eb; }
+        th { background: #f9fafb; color: #6b7280; }
+        .badge-pending { background: #fef3c7; color: #d97706; padding: 0.2rem 0.8rem; border-radius: 20px; }
+        .badge-shipped { background: #dbeafe; color: #2563eb; padding: 0.2rem 0.8rem; border-radius: 20px; }
+        .badge-delivered { background: #dcfce7; color: #22c55e; padding: 0.2rem 0.8rem; border-radius: 20px; }
+        .badge-cancelled { background: #fee2e2; color: #dc2626; padding: 0.2rem 0.8rem; border-radius: 20px; }
+        select { padding: 0.3rem 0.5rem; border-radius: 5px; border: 1px solid #e5e7eb; font-family: 'Tajawal', sans-serif; }
+        .filter-bar { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        .filter-select { padding: 0.5rem 1rem; border-radius: 25px; border: 1px solid #e5e7eb; }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-mouse-pointer"></i> Clicktopya</h2>
+                <p>Admin Dashboard</p>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="/admin" class="menu-item"><i class="fas fa-tachometer-alt"></i> لوحة التحكم</a>
+                <a href="/admin/products" class="menu-item"><i class="fas fa-box"></i> المنتجات</a>
+                <a href="/admin/categories" class="menu-item"><i class="fas fa-folder"></i> التصنيفات</a>
+                <a href="/admin/offers" class="menu-item"><i class="fas fa-tags"></i> العروض الترويجية</a>
+                <a href="/admin/users" class="menu-item"><i class="fas fa-users"></i> المستخدمين</a>
+                <a href="/admin/orders" class="menu-item active"><i class="fas fa-truck"></i> الطلبات</a>
+                <a href="/" class="menu-item"><i class="fas fa-store"></i> الموقع الرئيسي</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <h1>إدارة الطلبات</h1>
+                <div class="user-info">
+                    <span id="adminName">Admin</span>
+                    <button class="btn-logout" style="background:#dc2626; color:white; border:none; padding:0.5rem 1rem; border-radius:25px; cursor:pointer;" onclick="logout()">تسجيل خروج</button>
+                </div>
+            </div>
+
+            <div class="filter-bar">
+                <select id="statusFilter" class="filter-select" onchange="filterOrders()">
+                    <option value="all">جميع الطلبات</option>
+                    <option value="pending">قيد المعالجة</option>
+                    <option value="shipped">تم الشحن</option>
+                    <option value="delivered">تم التوصيل</option>
+                    <option value="cancelled">ملغية</option>
+                </select>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>رقم الطلب</th><th>المستخدم</th><th>المنتجات</th><th>المجموع</th><th>التاريخ</th><th>الحالة</th><th>الإجراء</th></tr>
+                    </thead>
+                    <tbody id="ordersList">
+                        <tr><td colspan="7" style="text-align:center">جاري التحميل...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let token = localStorage.getItem('token');
+        let user = JSON.parse(localStorage.getItem('user') || '{}');
+        let orders = [];
+
+        if (!token || !user.isAdmin) window.location.href = '/login';
+        document.getElementById('adminName').textContent = user.name;
+
+        async function loadOrders() {
+            try {
+                const res = await fetch('/api/orders', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    orders = await res.json();
+                    filterOrders();
+                } else {
+                    document.getElementById('ordersList').innerHTML = '<tr><td colspan="7" style="text-align:center">خطأ في تحميل البيانات</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function filterOrders() {
+            const status = document.getElementById('statusFilter').value;
+            let filtered = orders;
+            if (status !== 'all') {
+                filtered = orders.filter(o => o.status === status);
+            }
+            displayOrders(filtered);
+        }
+
+        function displayOrders(ordersToShow) {
+            const tbody = document.getElementById('ordersList');
+            if (ordersToShow.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">لا توجد طلبات</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = ordersToShow.map(order => `
+                <tr>
+                    <td><strong>#${order._id.slice(-8)}</strong></td>
+                    <td>
+                        <div style="font-weight:bold;">${order.customerName || order.user?.name || 'ضيف'}</div>
+                        ${order.customerPhone ? `<div style="font-size:0.8rem; color:#6b7280;" dir="ltr"><i class="fas fa-phone"></i> ${order.customerPhone}</div>` : ''}
+                        ${order.customerAddress ? `<div style="font-size:0.75rem; color:#9ca3af;"><i class="fas fa-map-marker-alt"></i> ${order.customerAddress}</div>` : ''}
+                    </td>
+                    <td>${order.items.map(i => `<div style="margin-bottom:4px;"><strong>${i.name}</strong> × ${i.quantity}${i.customDetails ? `<div style="font-size:0.75rem; color:#dc2626;"><i class="fas fa-tag"></i> ${i.customDetails}</div>` : ''}</div>`).join('')}</td>
+                    <td><strong>${order.totalPrice} ج</strong></td>
+                    <td>${new Date(order.createdAt).toLocaleDateString('ar-EG')}</td>
+                    <td><span class="badge-${order.status}">${order.status === 'pending' ? 'قيد المعالجة' : order.status === 'shipped' ? 'تم الشحن' : order.status === 'delivered' ? 'تم التوصيل' : 'ملغية'}</span></td>
+                    <td>
+                        <select onchange="updateOrderStatus('${order._id}', this.value)" style="padding:0.3rem; border-radius:5px;">
+                            <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>قيد المعالجة</option>
+                            <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>تم الشحن</option>
+                            <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>تم التوصيل</option>
+                            <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>ملغية</option>
+                        </select>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function updateOrderStatus(orderId, newStatus) {
+            try {
+                const res = await fetch(`/api/orders/${orderId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                if (res.ok) {
+                    loadOrders();
+                    alert('تم تحديث حالة الطلب بنجاح');
+                } else {
+                    alert('فشل تحديث الحالة');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('خطأ في الاتصال بالخادم');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        }
+
+        loadOrders();
+    </script>
+</body>
+</html>

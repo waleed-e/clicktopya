@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-i18n-title="pageCartTitle">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clicktopya | عربة التسوق</title>
+    <link rel="icon" type="image/png" href="/logo.png">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            DEFAULT: '#dc2626',
+                            hover: '#b91c1c',
+                            dark: '#991b1b',
+                            light: '#fef2f2'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Tajawal', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Font: Tajawal -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- AOS CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body class="font-sans bg-slate-50 text-slate-800 pt-20 flex flex-col min-h-screen">
+    <!-- Navbar -->
+    <nav id="siteNavbar" class="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
+            <!-- Brand Logo (Circular Only) -->
+            <a href="/" class="flex items-center shrink-0 group focus:outline-none" title="Clicktopya">
+                <div class="brand-logo-circle group-hover:scale-105 group-hover:shadow-lg transition duration-200">
+                    <img src="/logo.png" alt="Clicktopya" onerror="handleLogoError(this)">
+                </div>
+            </a>
+
+            <!-- Desktop Nav Links -->
+            <div class="hidden md:flex items-center gap-6 text-sm font-semibold text-white/90">
+                <a href="/" class="hover:text-white hover:border-b-2 hover:border-white/70 transition duration-150 py-1" data-i18n="home">الرئيسية</a>
+                <a href="/#stickersSection" class="hover:text-white hover:border-b-2 hover:border-white/70 transition duration-150 py-1 flex items-center gap-1.5 text-amber-200">
+                    <i class="fas fa-layer-group text-amber-300"></i>
+                    <span data-i18n="stickersNav">استيكرات لابتوب</span>
+                </a>
+                <a href="/products" class="hover:text-white hover:border-b-2 hover:border-white/70 transition duration-150 py-1" data-i18n="products">المنتجات</a>
+                <a href="/categories" class="hover:text-white hover:border-b-2 hover:border-white/70 transition duration-150 py-1" data-i18n="categories">التصنيفات</a>
+                <a href="/cart" class="hover:text-white transition duration-150 py-1 border-b-2 border-white flex items-center">
+                    <i class="fas fa-shopping-cart text-base me-1.5"></i>
+                    <span data-i18n="cart">عربة التسوق</span>
+                    <span id="cartCount" class="cart-badge">0</span>
+                </a>
+                <a href="/orders" class="hover:text-white hover:border-b-2 hover:border-white/70 transition duration-150 py-1" data-i18n="myOrders">طلباتي</a>
+                <a href="/admin" id="adminLink" class="hover:text-white bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full text-xs transition duration-150" style="display: none;" data-i18n="admin">لوحة التحكم</a>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-3">
+                <div class="flex items-center bg-white/15 p-0.5 rounded-full border border-white/20 text-xs font-bold text-white shadow-inner">
+                    <button type="button" class="lang-btn px-2.5 py-1 rounded-full" data-lang="ar" onclick="setLanguage('ar')">عربي</button>
+                    <button type="button" class="lang-btn px-2.5 py-1 rounded-full" data-lang="en" onclick="setLanguage('en')">EN</button>
+                </div>
+                <div class="hidden sm:flex items-center gap-2" id="authButtons">
+                    <button class="btn-hover border border-white/70 hover:border-white hover:bg-white/10 text-white px-4 py-1.5 rounded-full text-sm font-semibold transition" onclick="showLoginModal()" data-i18n="login">دخول</button>
+                    <button class="btn-hover bg-white text-red-600 hover:bg-red-50 px-4 py-1.5 rounded-full text-sm font-bold shadow-md transition" onclick="showRegisterModal()" data-i18n="register">تسجيل</button>
+                </div>
+                <div class="hidden items-center gap-2 text-white text-sm" id="userInfo">
+                    <div class="flex items-center gap-1.5 bg-white/20 px-3 py-1.5 rounded-full backdrop-blur-sm">
+                        <i class="fas fa-user-circle text-lg"></i>
+                        <span id="userName" class="font-bold max-w-[120px] truncate"></span>
+                    </div>
+                    <button onclick="logout()" class="btn-hover bg-white/15 hover:bg-white/30 px-3 py-1.5 rounded-full text-xs font-semibold" data-i18n="logout">خروج</button>
+                </div>
+                <button class="md:hidden text-white text-2xl p-1.5 rounded-lg hover:bg-white/10 focus:outline-none transition" onclick="toggleMobileNav()" aria-label="Toggle navigation">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Nav Menu -->
+        <div id="mobileNav" class="hidden md:hidden px-4 pt-2 pb-4 space-y-2 text-sm bg-red-700/95 backdrop-blur-md border-t border-white/10 shadow-lg">
+            <a href="/" class="block py-2 px-3 rounded-lg text-white font-medium hover:bg-white/10" data-i18n="home">الرئيسية</a>
+            <a href="/#stickersSection" class="flex items-center gap-2 py-2 px-3 rounded-lg font-medium hover:bg-amber-500/20 text-amber-200">
+                <i class="fas fa-layer-group text-amber-300"></i>
+                <span data-i18n="stickersNav">استيكرات لابتوب</span>
+            </a>
+            <a href="/products" class="block py-2 px-3 rounded-lg text-white font-medium hover:bg-white/10" data-i18n="products">المنتجات</a>
+            <a href="/categories" class="block py-2 px-3 rounded-lg text-white font-medium hover:bg-white/10" data-i18n="categories">التصنيفات</a>
+            <a href="/cart" class="flex items-center justify-between py-2 px-3 rounded-lg text-white font-medium hover:bg-white/10">
+                <span data-i18n="cart">عربة التسوق</span>
+                <span id="cartCountMobile" class="cart-badge">0</span>
+            </a>
+            <a href="/orders" class="block py-2 px-3 rounded-lg text-white font-medium hover:bg-white/10" data-i18n="myOrders">طلباتي</a>
+        </div>
+    </nav>
+
+
+    <!-- Page Header -->
+    <section class="bg-gradient-to-r from-red-600 to-rose-700 text-white py-10 px-4 shadow-inner">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center" data-aos="fade-up">
+            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 mb-3 shadow">
+                <i class="fas fa-shopping-bag text-2xl text-white"></i>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-black mb-1 tracking-tight" data-i18n="cart">عربة التسوق</h1>
+            <p class="text-red-100 text-sm">راجع طلباتك وأتمم الشراء كزائر بدون أي كلمة مرور أو حساب</p>
+        </div>
+    </section>
+
+    <!-- Cart Container Section -->
+    <main class="py-12 px-4 sm:px-6 lg:px-8 flex-grow">
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-3xl p-6 sm:p-8 md:p-10 shadow-sm border border-slate-200/80" id="cartCard" data-aos="fade-up">
+                <!-- Cart Content loaded by displayCart() -->
+                <div id="cartContent">
+                    <div class="text-center py-16">
+                        <div class="inline-block w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                        <p class="text-slate-500 font-bold" data-i18n="loading">جاري التحميل...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Checkout Modal (Guest Checkout - No Login Required) -->
+    <div id="checkoutModal" class="modal">
+        <div class="modal-content bg-white rounded-3xl p-6 sm:p-8 w-[92%] max-w-lg relative shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+            <button class="absolute top-4 end-4 text-slate-400 hover:text-slate-700 text-2xl leading-none w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 transition" onclick="closeCheckoutModal()">&times;</button>
+            
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl shadow-sm">
+                    <i class="fas fa-clipboard-check"></i>
+                </div>
+                <h2 class="text-2xl font-black text-slate-900" data-i18n="checkoutTitle">بيانات استلام الطلب</h2>
+                <p class="text-slate-500 text-xs mt-1">الدفع نقداً عند الاستلام • لا يلزم تسجيل الدخول</p>
+            </div>
+
+            <form onsubmit="submitGuestOrder(event)" class="space-y-4 text-start">
+                <!-- Customer Name -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1" for="customerName">
+                        <i class="fas fa-user text-red-500 me-1"></i>
+                        <span data-i18n="customerName">الاسم الكامل</span>
+                        <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="customerName" required placeholder="مثال: أحمد محمد علي" class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition bg-slate-50 focus:bg-white">
+                </div>
+
+                <!-- Customer Phone -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1" for="customerPhone">
+                        <i class="fas fa-phone text-red-500 me-1"></i>
+                        <span data-i18n="customerPhone">رقم الموبايل</span>
+                        <span class="text-red-500">*</span>
+                    </label>
+                    <input type="tel" id="customerPhone" required placeholder="مثال: 01012345678" dir="ltr" class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm text-end focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition bg-slate-50 focus:bg-white">
+                </div>
+
+                <!-- Customer Address -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1" for="customerAddress">
+                        <i class="fas fa-map-marker-alt text-red-500 me-1"></i>
+                        <span data-i18n="customerAddress">العنوان بالتفصيل</span>
+                        <span class="text-red-500">*</span>
+                    </label>
+                    <textarea id="customerAddress" required rows="3" placeholder="المحافظة، المدينة، اسم الشارع، رقم العمارة والشقة" class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition bg-slate-50 focus:bg-white resize-none"></textarea>
+                </div>
+
+                <!-- Payment Note -->
+                <div class="bg-amber-50 border border-amber-200/70 rounded-2xl p-3 flex items-start gap-2 text-xs text-amber-800">
+                    <i class="fas fa-info-circle text-amber-600 mt-0.5"></i>
+                    <span>طريقة الدفع: <strong>الدفع نقداً عند الاستلام</strong> فقط. سيتم تأكيد شحن طلبك عبر الواتساب فور إرساله.</span>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="pt-2 space-y-2">
+                    <button id="confirmOrderBtn" type="submit" class="btn-hover w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-full font-extrabold text-base shadow-lg shadow-red-600/30 transition flex items-center justify-center gap-2">
+                        <i class="fas fa-check-circle"></i>
+                        <span data-i18n="confirmOrder">تأكيد الطلب الآن</span>
+                    </button>
+                    <button type="button" class="w-full py-2.5 rounded-full text-slate-500 hover:text-slate-800 hover:bg-slate-100 text-sm font-semibold transition" onclick="closeCheckoutModal()" data-i18n="cancel">
+                        إلغاء والعودة للسلة
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-300 mt-auto pt-16 pb-8 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+                <div class="md:col-span-2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="brand-logo-circle w-11 h-11">
+                            <img src="/logo.png" alt="Clicktopya" onerror="handleLogoError(this)">
+                        </div>
+                        <span class="logo-text font-black text-2xl text-white">Clicktopya</span>
+                    </div>
+                    <p class="text-slate-400 text-sm leading-relaxed max-w-sm" data-i18n="footerTagline">
+                        أضغط واشتري — وجهتك الأولى للتسوق الإلكتروني الأسرع والأسهل في مصر.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-white font-black text-base mb-4 tracking-wide" data-i18n="quickLinks">روابط سريعة</h3>
+                    <ul class="space-y-2.5 text-sm">
+                        <li><a href="/" class="text-slate-400 hover:text-white transition" data-i18n="home">الرئيسية</a></li>
+                        <li><a href="/#stickersSection" class="text-slate-400 hover:text-white transition" data-i18n="stickersNav">استيكرات لابتوب</a></li>
+                        <li><a href="/products" class="text-slate-400 hover:text-white transition" data-i18n="products">المنتجات</a></li>
+                        <li><a href="/categories" class="text-slate-400 hover:text-white transition" data-i18n="categories">التصنيفات</a></li>
+                        <li><a href="/cart" class="text-slate-400 hover:text-white transition" data-i18n="cart">عربة التسوق</a></li>
+                        <li><a href="/orders" class="text-slate-400 hover:text-white transition" data-i18n="myOrders">طلباتي</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-white font-black text-base mb-4 tracking-wide" data-i18n="contactUs">تواصل معنا</h3>
+                    <ul class="space-y-3 text-sm text-slate-400">
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-phone text-red-500"></i>
+                            <span dir="ltr">01011643099</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fab fa-whatsapp text-emerald-400 text-base"></i>
+                            <a href="https://wa.me/201011643099" target="_blank" class="hover:text-emerald-400 transition" dir="ltr">+20 101 164 3099</a>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-envelope text-red-500"></i>
+                            <span>info@clicktopya.com</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="pt-8 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+                <p>
+                    <span>© 2026 </span>
+                    <span data-i18n="copyright">Clicktopya — جميع الحقوق محفوظة</span>
+                </p>
+                <div class="flex items-center gap-4 text-xs">
+                    <span>الدفع عند الاستلام</span>
+                    <span>•</span>
+                    <span>طلب فوري عبر واتساب</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script src="/script.js"></script>
+</body>
+</html>

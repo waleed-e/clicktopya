@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-i18n-title="pageHomeTitle">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clicktopya | متجرك الإلكتروني</title>
+    <link rel="icon" type="image/png" href="/logo.png">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            DEFAULT: '#dc2626',
+                            hover: '#b91c1c',
+                            dark: '#991b1b',
+                            light: '#fef2f2'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Tajawal', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Font: Tajawal -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- AOS CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body class="font-sans bg-slate-50 text-slate-800 pt-20 flex flex-col min-h-screen">
+    <!-- Navbar -->
+    <nav id="siteNavbar" class="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
+            <!-- Brand Logo (Circular Logo Only, No Text Name) -->
+            <a href="/" class="flex items-center shrink-0 group focus:outline-none" title="Clicktopya">
+                <div class="brand-logo-circle group-hover:scale-105 group-hover:shadow-lg transition duration-200">
+                    <img src="/logo.png" alt="Clicktopya" onerror="handleLogoError(this)">
+                </div>
+            </a>
+
+            <!-- Desktop Nav Links -->
+            <div class="hidden lg:flex items-center gap-5 text-sm font-bold text-white/90">
+                <a href="/" class="hover:text-white transition duration-150 py-1 border-b-2 border-white" data-i18n="home">الرئيسية</a>
+                <a href="#stickersSection" class="hover:text-white hover:border-b-2 hover:border-white/70 transition duration-150 py-1 flex items-center gap-1.5 text-amber-200">
+                    <i class="fas fa-layer-group text-amber-300"></i>
+                    <span data-i18n="stickersNav">استيكرات لابتوب</span>
+                </a>
+                <a href="/products" class="hover:text-white hover:border-b-2 hover:border-white/70 transition duration-150 py-1" data-i18n="products">المنتجات</a>
+                <a href="/categories" class="hover:text-white hover:border-b-2 hover:border-white/70 transition duration-150 py-1" data-i18n="categories">التصنيفات</a>
+                <a href="/cart" class="hover:text-white transition duration-150 py-1 flex items-center">
+                    <i class="fas fa-shopping-cart text-base me-1.5"></i>
+                    <span data-i18n="cart">عربة التسوق</span>
+                    <span id="cartCount" class="cart-badge">0</span>
+                </a>
+                <a href="/orders" class="hover:text-white hover:border-b-2 hover:border-white/70 transition duration-150 py-1" data-i18n="myOrders">طلباتي</a>
+                <a href="/admin" id="adminLink" class="hover:text-white bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full text-xs transition duration-150" style="display: none;" data-i18n="admin">لوحة التحكم</a>
+            </div>
+
+            <!-- Actions: Language, Auth, Mobile toggle -->
+            <div class="flex items-center gap-3">
+                <!-- Language Selector -->
+                <div class="flex items-center bg-white/15 p-0.5 rounded-full border border-white/20 text-xs font-bold text-white shadow-inner">
+                    <button type="button" class="lang-btn px-2.5 py-1 rounded-full" data-lang="ar" onclick="setLanguage('ar')">عربي</button>
+                    <button type="button" class="lang-btn px-2.5 py-1 rounded-full" data-lang="en" onclick="setLanguage('en')">EN</button>
+                </div>
+
+                <!-- Auth Buttons (Guest) -->
+                <div class="hidden sm:flex items-center gap-2" id="authButtons">
+                    <button class="btn-hover border border-white/70 hover:border-white hover:bg-white/10 text-white px-4 py-1.5 rounded-full text-sm font-semibold transition" onclick="showLoginModal()" data-i18n="login">دخول</button>
+                    <button class="btn-hover bg-white text-red-600 hover:bg-red-50 px-4 py-1.5 rounded-full text-sm font-bold shadow-md transition" onclick="showRegisterModal()" data-i18n="register">تسجيل</button>
+                </div>
+
+                <!-- User Info (Logged In) -->
+                <div class="hidden items-center gap-2 text-white text-sm" id="userInfo">
+                    <div class="flex items-center gap-1.5 bg-white/20 px-3 py-1.5 rounded-full backdrop-blur-sm">
+                        <i class="fas fa-user-circle text-lg"></i>
+                        <span id="userName" class="font-bold max-w-[120px] truncate"></span>
+                    </div>
+                    <button onclick="logout()" class="btn-hover bg-white/15 hover:bg-white/30 px-3 py-1.5 rounded-full text-xs font-semibold" data-i18n="logout">خروج</button>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button class="lg:hidden text-white text-2xl p-1.5 rounded-lg hover:bg-white/10 focus:outline-none transition" onclick="toggleMobileNav()" aria-label="Toggle navigation">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div id="mobileNav" class="hidden lg:hidden px-4 pt-2 pb-4 space-y-2 text-sm bg-red-700/95 backdrop-blur-md border-t border-white/10 shadow-lg">
+            <div class="flex items-center justify-between py-2 border-b border-white/15 mb-2">
+                <a href="/" class="brand-logo-circle w-10 h-10">
+                    <img src="/logo.png" alt="Clicktopya">
+                </a>
+            </div>
+            <a href="/" class="block py-2 px-3 rounded-lg text-white font-medium hover:bg-white/10" data-i18n="home">الرئيسية</a>
+            <a href="#stickersSection" onclick="toggleMobileNav()" class="block py-2 px-3 rounded-lg text-amber-200 font-black hover:bg-white/10" data-i18n="stickersNav">استيكرات لابتوب</a>
+            <a href="/products" class="block py-2 px-3 rounded-lg text-white font-medium hover:bg-white/10" data-i18n="products">المنتجات</a>
+            <a href="/categories" class="block py-2 px-3 rounded-lg text-white font-medium hover:bg-white/10" data-i18n="categories">التصنيفات</a>
+            <a href="/cart" class="flex items-center justify-between py-2 px-3 rounded-lg text-white font-medium hover:bg-white/10">
+                <span data-i18n="cart">عربة التسوق</span>
+                <span id="cartCountMobile" class="cart-badge">0</span>
+            </a>
+            <a href="/orders" class="block py-2 px-3 rounded-lg text-white font-medium hover:bg-white/10" data-i18n="myOrders">طلباتي</a>
+            <div class="pt-2 border-t border-white/20 flex gap-2 sm:hidden" id="authButtonsMobile">
+                <button class="flex-1 border border-white text-white py-2 rounded-xl text-center font-bold" onclick="showLoginModal()" data-i18n="login">دخول</button>
+                <button class="flex-1 bg-white text-red-600 py-2 rounded-xl text-center font-bold shadow" onclick="showRegisterModal()" data-i18n="register">تسجيل</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative overflow-hidden bg-gradient-to-br from-red-600 via-rose-600 to-red-800 text-white py-20 md:py-28 px-4 text-center">
+        <!-- Subtle Branded Logo Watermark in Background -->
+        <div class="hero-logo-watermark">
+            <img src="/logo.png" alt="" class="w-full h-full object-contain">
+        </div>
+
+        <!-- Ambient Decorative Glows -->
+        <div class="absolute top-0 start-1/4 -translate-x-1/2 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute bottom-0 end-1/4 translate-x-1/2 w-96 h-96 bg-black/20 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="relative max-w-4xl mx-auto z-10" data-aos="fade-up">
+            <!-- Official Brand Circular Logo in Hero -->
+            <div class="inline-flex p-3 rounded-full bg-white/15 backdrop-blur-md border border-white/25 mb-6 shadow-2xl transition duration-300 hover:scale-105">
+                <img src="/logo.png" alt="Clicktopya" class="h-20 w-20 md:h-24 md:w-24 object-contain rounded-full drop-shadow-md" onerror="this.style.display='none'">
+            </div>
+
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-black mb-4 tracking-tight leading-tight drop-shadow-sm" data-i18n="heroTitle">
+                كل اللي تحتاجه في نقرة واحدة
+            </h1>
+            <p class="text-lg sm:text-xl md:text-2xl font-medium text-red-50 max-w-2xl mx-auto leading-relaxed" data-i18n="heroSubtitle">
+                أكبر تشكيلة إكسسوارات واستيكرات لابتوب فينيل ضد المية بأعلى جودة وتوصيل سريع لحد باب بيتك
+            </p>
+
+            <!-- Call to Actions -->
+            <div class="mt-8 flex flex-wrap justify-center gap-4">
+                <button class="btn-hover bg-white text-red-600 hover:bg-slate-50 px-8 py-3.5 rounded-full text-base sm:text-lg font-black shadow-xl hover:shadow-2xl flex items-center gap-2" onclick="scrollToStickers()">
+                    <i class="fas fa-layer-group text-red-600"></i>
+                    <span>استكشف استيكرات اللابتوب</span>
+                    <i class="fas fa-arrow-left text-xs"></i>
+                </button>
+                <button class="btn-hover bg-slate-900/60 hover:bg-slate-900/80 border border-white/30 text-white px-7 py-3.5 rounded-full text-base sm:text-lg font-black backdrop-blur-sm flex items-center gap-2" onclick="scrollToStickers(); selectStickerSize('under_7cm');">
+                    <i class="fas fa-wand-magic-sparkles text-amber-300"></i>
+                    <span>صمّم الاستيكر بتاعك</span>
+                </button>
+                <button class="btn-hover bg-red-800/40 hover:bg-red-800/60 border border-white/20 text-white px-6 py-3.5 rounded-full text-sm sm:text-base font-bold backdrop-blur-sm" onclick="scrollToProducts()" data-i18n="ourProducts">
+                    جميع المنتجات
+                </button>
+            </div>
+
+            <!-- Trust Badges -->
+            <div class="mt-12 pt-8 border-t border-white/15 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs sm:text-sm text-red-100 font-semibold max-w-3xl mx-auto">
+                <div class="flex items-center justify-center gap-2">
+                    <i class="fas fa-tint-slash text-base text-amber-300"></i>
+                    <span>استيكرات فينيل ضد الماء</span>
+                </div>
+                <div class="flex items-center justify-center gap-2">
+                    <i class="fas fa-scissors text-base text-amber-300"></i>
+                    <span>طباعة وقص دي-كت دقيق</span>
+                </div>
+                <div class="flex items-center justify-center gap-2">
+                    <i class="fas fa-money-bill-wave text-base text-white"></i>
+                    <span>الدفع عند الاستلام</span>
+                </div>
+                <div class="flex items-center justify-center gap-2">
+                    <i class="fab fa-whatsapp text-base text-emerald-300"></i>
+                    <span>تأكيد فوري عبر واتساب</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========================================================
+         LATEST OFFERS SECTION (DYNAMIC ADMIN OFFERS)
+         ======================================================== -->
+    <section id="latestOffersSection" class="py-16 bg-white border-b border-slate-200/80 relative" style="display: none;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-12" data-aos="fade-up">
+                <span class="inline-flex items-center gap-1 px-4 py-1 rounded-full bg-red-100 text-red-700 text-xs font-black uppercase tracking-wider mb-2">
+                    <i class="fas fa-bolt text-red-600"></i>
+                    <span>عروض متجددة</span>
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">أحدث العروض الحصرية</h2>
+                <p class="text-slate-500 text-sm sm:text-base mt-2">وفر أكثر واستمتع بخصومات وباقات لا تُفوت لفترة محدودة</p>
+            </div>
+
+            <!-- Offers Grid Injected by loadLatestOffers() -->
+            <div id="latestOffersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Injected via JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================================
+         2. FEATURED "LAPTOP STICKERS" SECTION
+         ======================================================== -->
+    <section id="stickersSection" class="py-20 bg-gradient-to-b from-slate-100 via-white to-slate-50 relative overflow-hidden">
+        <!-- Floating Sticker Background Elements -->
+        <div class="absolute -top-10 -start-10 w-48 h-48 bg-rose-500/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="absolute -bottom-10 -end-10 w-60 h-60 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <!-- Section Header -->
+            <div class="text-center max-w-3xl mx-auto mb-16" data-aos="fade-up">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-100 text-red-700 text-xs font-black uppercase tracking-wider mb-4 shadow-xs">
+                    <i class="fas fa-laptop-code text-red-600"></i>
+                    <span>Laptop Stickers Studio • استوديو استيكرات اللابتوب</span>
+                </div>
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+                    استيكرات لابتوب أصلية.. تعبّر عن شخصيتك
+                </h2>
+                <p class="text-slate-600 text-base sm:text-lg mt-3 leading-relaxed">
+                    فينيل مستورد عالي الجودة، مقاوم للمياه والحرارة، لا يترك أي أثر صمغ عند الإزالة. اختر من باقاتنا الجاهزة أو صمّم استيكرك الخاص بالكامل!
+                </p>
+            </div>
+
+            <!-- ========================================================
+                 5. STICKER OFFERS (PROMOTIONAL PACKAGES)
+                 ======================================================== -->
+            <div class="mb-20" data-aos="fade-up">
+                <div class="text-center mb-8">
+                    <span class="text-xs font-black uppercase tracking-widest text-red-600 bg-red-50 px-3 py-1 rounded-full border border-red-100">وفر أكثر مع الباقات</span>
+                    <h3 class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">عروض وباقات الاستيكرات الحصرية</h3>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
+                    <!-- Offer 1: 10 Stickers (50 EGP) -->
+                    <div class="sticker-card bg-white rounded-3xl p-6 sm:p-8 border-2 border-slate-200/80 shadow-md flex flex-col justify-between relative hover:border-red-400 rotate-[-1deg]">
+                        <div class="sticker-tape"></div>
+                        <div class="absolute top-4 end-4">
+                            <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-extrabold">باقة البداية</span>
+                        </div>
+                        <div>
+                            <div class="w-14 h-14 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center text-2xl font-black mb-4">
+                                10
+                            </div>
+                            <h4 class="text-xl font-black text-slate-900 mb-1">باقة 10 استيكرات</h4>
+                            <p class="text-slate-500 text-xs mb-4">10 استيكرات متنوعة عالية الجودة لظهر اللابتوب</p>
+                            
+                            <div class="my-4 pt-4 border-t border-slate-100">
+                                <div class="flex items-baseline gap-2">
+                                    <span class="text-3xl sm:text-4xl font-black text-red-600">50</span>
+                                    <span class="text-sm font-bold text-slate-600">جنيه فقط</span>
+                                </div>
+                                <span class="text-[11px] text-slate-400 line-through">بدلاً من 70 جنيه</span>
+                            </div>
+
+                            <ul class="space-y-2 text-xs text-slate-600 mb-6">
+                                <li class="flex items-center gap-2"><i class="fas fa-check text-emerald-500"></i> فينيل مقاوم للماء 100%</li>
+                                <li class="flex items-center gap-2"><i class="fas fa-check text-emerald-500"></i> مقاسات مثالية للابتوب</li>
+                                <li class="flex items-center gap-2"><i class="fas fa-check text-emerald-500"></i> خالية من أثر الصمغ عند الإزالة</li>
+                            </ul>
+                        </div>
+
+                        <button class="btn-hover w-full bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-full font-black text-sm shadow-md shadow-red-600/20 flex items-center justify-center gap-2" onclick="addStickerOfferToCart(10, 50)">
+                            <i class="fas fa-cart-plus"></i>
+                            <span>اطلب باقة 10 بـ 50 ج</span>
+                        </button>
+                    </div>
+
+                    <!-- Offer 2: 20 Stickers (90 EGP) - Best Seller -->
+                    <div class="sticker-card bg-gradient-to-b from-white to-red-50/40 rounded-3xl p-6 sm:p-8 border-2 border-red-500 shadow-xl flex flex-col justify-between relative ring-4 ring-red-100 scale-105 z-10 rotate-[0.5deg]">
+                        <div class="sticker-tape"></div>
+                        <div class="absolute top-4 end-4">
+                            <span class="px-3 py-1 rounded-full bg-red-600 text-white text-xs font-black shadow-sm"><i class="fas fa-fire text-amber-300 me-1"></i> الأكثر طلباً</span>
+                        </div>
+                        <div>
+                            <div class="w-14 h-14 rounded-2xl bg-red-600 text-white flex items-center justify-center text-2xl font-black mb-4 shadow-sm">
+                                20
+                            </div>
+                            <h4 class="text-xl font-black text-slate-900 mb-1">باقة 20 استيكر</h4>
+                            <p class="text-slate-500 text-xs mb-4">التشكيلة الأشمل لكافة أجهزة اللابتوب والتابلت</p>
+                            
+                            <div class="my-4 pt-4 border-t border-red-100">
+                                <div class="flex items-baseline gap-2">
+                                    <span class="text-3xl sm:text-4xl font-black text-red-600">90</span>
+                                    <span class="text-sm font-bold text-slate-600">جنيه فقط</span>
+                                </div>
+                                <span class="text-[11px] text-slate-400 line-through">بدلاً من 140 جنيه</span>
+                            </div>
+
+                            <ul class="space-y-2 text-xs text-slate-600 mb-6">
+                                <li class="flex items-center gap-2"><i class="fas fa-check text-emerald-500 font-bold"></i> 20 استيكر فينيل مميز</li>
+                                <li class="flex items-center gap-2"><i class="fas fa-check text-emerald-500 font-bold"></i> مزيج بين البرمجة والجيمينج والميمز</li>
+                                <li class="flex items-center gap-2"><i class="fas fa-check text-emerald-500 font-bold"></i> طبقة سيلوفان مطفي ضد الخدش</li>
+                            </ul>
+                        </div>
+
+                        <button class="btn-hover w-full bg-red-600 hover:bg-red-700 text-white py-3.5 px-4 rounded-full font-black text-sm shadow-lg shadow-red-600/30 flex items-center justify-center gap-2" onclick="addStickerOfferToCart(20, 90)">
+                            <i class="fas fa-cart-plus"></i>
+                            <span>اطلب باقة 20 بـ 90 ج</span>
+                        </button>
+                    </div>
+
+                    <!-- Offer 3: 50 Stickers (180 EGP) - Best Value -->
+                    <div class="sticker-card bg-white rounded-3xl p-6 sm:p-8 border-2 border-slate-200/80 shadow-md flex flex-col justify-between relative hover:border-red-400 rotate-[1deg]">
+                        <div class="sticker-tape"></div>
+                        <div class="absolute top-4 end-4">
+                            <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-black"><i class="fas fa-gem text-amber-500 me-1"></i> أفضل توفير</span>
+                        </div>
+                        <div>
+                            <div class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl font-black mb-4">
+                                50
+                            </div>
+                            <h4 class="text-xl font-black text-slate-900 mb-1">باقة 50 استيكر</h4>
+                            <p class="text-slate-500 text-xs mb-4">الباقة الضخمة لتزيين اللابتوبات ومشاركتها مع أصحابك</p>
+                            
+                            <div class="my-4 pt-4 border-t border-slate-100">
+                                <div class="flex items-baseline gap-2">
+                                    <span class="text-3xl sm:text-4xl font-black text-red-600">180</span>
+                                    <span class="text-sm font-bold text-slate-600">جنيه فقط</span>
+                                </div>
+                                <span class="text-[11px] text-slate-400 line-through">بدلاً من 300 جنيه</span>
+                            </div>
+
+                            <ul class="space-y-2 text-xs text-slate-600 mb-6">
+                                <li class="flex items-center gap-2"><i class="fas fa-check text-emerald-500"></i> 50 استيكر بدون تكرار</li>
+                                <li class="flex items-center gap-2"><i class="fas fa-check text-emerald-500"></i> أعلى وفر للقطعة الواحدة</li>
+                                <li class="flex items-center gap-2"><i class="fas fa-check text-emerald-500"></i> مناسبة للشركات والفرق ومحبي الاستيكرات</li>
+                            </ul>
+                        </div>
+
+                        <button class="btn-hover w-full bg-slate-900 hover:bg-slate-800 text-white py-3 px-4 rounded-full font-black text-sm shadow-md flex items-center justify-center gap-2" onclick="addStickerOfferToCart(50, 180)">
+                            <i class="fas fa-cart-plus text-amber-400"></i>
+                            <span>اطلب باقة 50 بـ 180 ج</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================================
+                 4. & 7. INTERACTIVE CUSTOM STICKER STUDIO
+                 ======================================================== -->
+            <div id="customStickerStudio" class="bg-white rounded-3xl p-6 sm:p-10 md:p-12 border-2 border-red-200/80 shadow-xl relative mb-20" data-aos="fade-up">
+                <div class="sticker-tape"></div>
+                
+                <div class="text-center max-w-2xl mx-auto mb-10">
+                    <span class="inline-flex items-center gap-1.5 px-4 py-1 rounded-full bg-red-100 text-red-700 text-xs font-black uppercase tracking-wider mb-2">
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                        <span>أداة التصميم المخصص</span>
+                    </span>
+                    <h3 class="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900" data-i18n="customStickersTitle">
+                        صمّم الاستيكر بتاعك
+                    </h3>
+                    <p class="text-slate-500 text-sm mt-1" data-i18n="customStickersSubtitle">
+                        اطبع لوجو شركتك، تصميمك الخاص، أو شخصيتك المفضلة بالمقاس والكمية التي تناسبك مع شحن سريع
+                    </p>
+                </div>
+
+                <!-- Customizer Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    <!-- Controls Form (7 Cols) -->
+                    <div class="lg:col-span-7 space-y-6">
+                        <!-- Step 1: Size Selector -->
+                        <div>
+                            <label class="block text-sm font-black text-slate-800 mb-2">
+                                1. اختر مقاس الاستيكر:
+                            </label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <!-- Option A: Under 7x7 cm -->
+                                <button type="button" id="sizeBtnSmall" class="p-4 rounded-2xl border-2 border-red-600 bg-red-50/70 ring-2 ring-red-300 text-start transition duration-200 cursor-pointer focus:outline-none" onclick="selectStickerSize('under_7cm')">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="font-black text-slate-900 text-sm" data-i18n="stickerSizeSmall">أصغر من 7 × 7 سم</span>
+                                        <span class="px-2 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-bold">صغير</span>
+                                    </div>
+                                    <div class="text-red-600 font-extrabold text-base mb-1" data-i18n="stickerSizeSmallPrice">10 جنيه / استيكر</div>
+                                    <p class="text-[11px] text-slate-500">المقاس القياسي لأغلب اللابتوبات (6 × 6 سم)</p>
+                                </button>
+
+                                <!-- Option B: 7x7 to 15x15 cm -->
+                                <button type="button" id="sizeBtnLarge" class="p-4 rounded-2xl border-2 border-slate-200 bg-white text-start transition duration-200 cursor-pointer hover:border-red-300 focus:outline-none" onclick="selectStickerSize('7_to_15cm')">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="font-black text-slate-900 text-sm" data-i18n="stickerSizeLarge">من 7 × 7 حتى 15 × 15 سم</span>
+                                        <span class="px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 text-[10px] font-bold">كبير</span>
+                                    </div>
+                                    <div class="text-red-600 font-extrabold text-base mb-1" data-i18n="stickerSizeLargePrice">15 جنيه / استيكر</div>
+                                    <p class="text-[11px] text-slate-500">مقاس كبير للرسومات والشعارات البارزة</p>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Quantity Selector (Min 10) -->
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="text-sm font-black text-slate-800">
+                                    2. حدد الكمية:
+                                </label>
+                                <span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-md border border-red-100" data-i18n="minQtyNotice">
+                                    الحد الأدنى 10 قطع
+                                </span>
+                            </div>
+
+                            <div class="flex items-center gap-4">
+                                <div class="flex items-center border-2 border-slate-200 rounded-2xl bg-slate-50 p-1 w-44 shadow-inner">
+                                    <button type="button" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white shadow text-slate-700 hover:text-red-600 font-black text-lg transition" onclick="adjustCustomStickerQty(-1)">-</button>
+                                    <input type="number" id="customStickerQtyInput" min="10" value="10" class="w-full text-center bg-transparent font-black text-lg text-slate-900 outline-none" onchange="setCustomStickerQty(this.value)">
+                                    <button type="button" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white shadow text-slate-700 hover:text-red-600 font-black text-lg transition" onclick="adjustCustomStickerQty(1)">+</button>
+                                </div>
+                                <span class="text-xs text-slate-500 font-medium leading-tight max-w-[200px]" data-i18n="minQtyExplain">
+                                    الحد الأدنى 10 استيكرات لضمان دقة الطباعة وتكلفة القص بالليزر
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Design Link / Notes -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1" for="customStickerNotes" data-i18n="customStickerDesignNote">
+                                رابط التصميم أو تفاصيل الفكرة (اختياري):
+                            </label>
+                            <input type="text" id="customStickerNotes" class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition bg-slate-50 focus:bg-white" data-i18n-placeholder="customStickerDesignPlaceholder" placeholder="اكتب فكرة التصميم أو رابط درايف/بينترست، أو سنتواصل معك عبر واتساب لتأكيد الملف">
+                        </div>
+
+                        <!-- Live Price Breakdown -->
+                        <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between">
+                            <div>
+                                <span class="text-xs text-slate-500 block">سعر الاستيكر الواحد:</span>
+                                <span id="customStickerUnitPrice" class="font-black text-slate-800 text-sm">10 جنيه</span>
+                            </div>
+                            <div class="text-end">
+                                <span class="text-xs text-slate-500 block">الإجمالي الكلي:</span>
+                                <span id="customStickerTotal" class="font-black text-red-600 text-2xl">100 جنيه</span>
+                            </div>
+                        </div>
+
+                        <!-- 6. CUSTOMIZATION WARNING / DELIVERY NOTICE -->
+                        <div class="bg-amber-50 border border-amber-200/80 rounded-2xl p-4 flex items-start gap-3 text-amber-900 shadow-xs">
+                            <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 text-base">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-bold text-xs mb-0.5 text-amber-950">تنويه وقت التنفيذ والتجهيز:</h5>
+                                <p class="text-xs text-amber-800 leading-relaxed" data-i18n="customWarningNotice">
+                                    الاستيكرز المخصصة بتحتاج من 7 إلى 10 أيام للتنفيذ.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Add to Cart CTA -->
+                        <button type="button" class="btn-hover w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-full font-black text-base shadow-xl shadow-red-600/25 flex items-center justify-center gap-2 transition" onclick="addCustomStickerToCart()">
+                            <i class="fas fa-cart-plus text-lg"></i>
+                            <span data-i18n="addCustomStickerBtn">إضافة الاستيكر المخصص للسلة</span>
+                        </button>
+                    </div>
+
+                    <!-- Laptop Back Interactive Mockup Preview (5 Cols) -->
+                    <div class="lg:col-span-5 flex flex-col items-center justify-center">
+                        <div class="text-center mb-3">
+                            <span class="text-xs font-black text-slate-600 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+                                <i class="fas fa-eye text-red-600 me-1"></i> معاينة الحجم على ظهر اللابتوب
+                            </span>
+                        </div>
+
+                        <!-- Mockup Container -->
+                        <div class="laptop-mockup-back w-full max-w-[340px] h-[230px] p-6 flex flex-col items-center justify-center relative overflow-hidden">
+                            <!-- Laptop center emblem -->
+                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none laptop-apple-logo">
+                                <i class="fas fa-laptop text-7xl text-white"></i>
+                            </div>
+
+                            <!-- Dynamic Sticker Preview Object -->
+                            <div id="laptopPreviewSticker" class="custom-sticker-preview-box rounded-2xl bg-white p-2 shadow-2xl flex flex-col items-center justify-center border-2 border-white relative z-10 animate-sticker-float" style="width: 62px; height: 62px;">
+                                <img src="/logo.png" alt="Sticker Preview" class="w-full h-full object-contain rounded-lg">
+                            </div>
+
+                            <span id="previewSizeBadge" class="absolute bottom-3 end-4 bg-slate-900/90 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full border border-white/20">
+                                6 × 6 سم (صغير)
+                            </span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-2 text-center">المعاينة تقريبية لتوضيح تناسب الحجم مع ظهر اللابتوب</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pre-made Sticker Collections Highlights -->
+            <div>
+                <div class="flex items-center justify-between mb-8 flex-wrap gap-4">
+                    <div>
+                        <span class="text-xs font-black uppercase text-red-600 bg-red-50 px-2.5 py-1 rounded-full">تشكيلات جاهزة</span>
+                        <h3 class="text-2xl font-black text-slate-900 mt-1">أشهر مجموعات استيكرات اللابتوب الجاهزة</h3>
+                    </div>
+                    <a href="/products/category/stickers" class="text-xs font-black text-red-600 hover:underline flex items-center gap-1">
+                        <span>عرض كافة استيكرات اللابتوب</span>
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Tech & Dev Pack -->
+                    <div class="sticker-card bg-white rounded-3xl p-5 border border-slate-200/80 shadow-sm flex flex-col justify-between rotate-[-1deg]">
+                        <div class="aspect-square bg-slate-50 rounded-2xl overflow-hidden mb-3 relative flex items-center justify-center p-2">
+                            <span class="absolute top-2 start-2 bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded-md">المبرمجين</span>
+                            <img src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=500&auto=format&fit=crop&q=80" alt="Dev Pack" class="w-full h-full object-cover rounded-xl" onerror="this.src='/logo.png'">
+                        </div>
+                        <div>
+                            <h4 class="font-extrabold text-sm text-slate-800 mb-1">بكج استيكرات المبرمجين (Dev & Coding)</h4>
+                            <p class="text-xs text-slate-500 mb-2">10 استيكرات فينيل ضد الماء (JS, Python, Git, React)</p>
+                            <div class="text-lg font-black text-red-600 mb-3">50 جنيه</div>
+                        </div>
+                        <button class="btn-hover w-full bg-slate-900 hover:bg-slate-800 text-white py-2 px-3 rounded-full text-xs font-bold flex items-center justify-center gap-1.5" onclick="addStickerOfferToCart(10, 50)">
+                            <i class="fas fa-cart-plus text-amber-400"></i> أضف للسلة (10 قطع)
+                        </button>
+                    </div>
+
+                    <!-- Cyber Gaming Pack -->
+                    <div class="sticker-card bg-white rounded-3xl p-5 border border-slate-200/80 shadow-sm flex flex-col justify-between rotate-[1deg]">
+                        <div class="aspect-square bg-slate-50 rounded-2xl overflow-hidden mb-3 relative flex items-center justify-center p-2">
+                            <span class="absolute top-2 start-2 bg-indigo-600 text-white text-[10px] font-black px-2 py-0.5 rounded-md">الجيمينج</span>
+                            <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=80" alt="Gaming Pack" class="w-full h-full object-cover rounded-xl" onerror="this.src='/logo.png'">
+                        </div>
+                        <div>
+                            <h4 class="font-extrabold text-sm text-slate-800 mb-1">بكج استيكرات الجيمينج (Cyber Gaming)</h4>
+                            <p class="text-xs text-slate-500 mb-2">10 استيكرات ألعاب وسايبر بانك فائقة الدقة</p>
+                            <div class="text-lg font-black text-red-600 mb-3">50 جنيه</div>
+                        </div>
+                        <button class="btn-hover w-full bg-slate-900 hover:bg-slate-800 text-white py-2 px-3 rounded-full text-xs font-bold flex items-center justify-center gap-1.5" onclick="addStickerOfferToCart(10, 50)">
+                            <i class="fas fa-cart-plus text-amber-400"></i> أضف للسلة (10 قطع)
+                        </button>
+                    </div>
+
+                    <!-- Anime Vibes Pack -->
+                    <div class="sticker-card bg-white rounded-3xl p-5 border border-slate-200/80 shadow-sm flex flex-col justify-between rotate-[-0.5deg]">
+                        <div class="aspect-square bg-slate-50 rounded-2xl overflow-hidden mb-3 relative flex items-center justify-center p-2">
+                            <span class="absolute top-2 start-2 bg-pink-600 text-white text-[10px] font-black px-2 py-0.5 rounded-md">الأنمي</span>
+                            <img src="https://images.unsplash.com/photo-1563089145-599997674d42?w=500&auto=format&fit=crop&q=80" alt="Anime Pack" class="w-full h-full object-cover rounded-xl" onerror="this.src='/logo.png'">
+                        </div>
+                        <div>
+                            <h4 class="font-extrabold text-sm text-slate-800 mb-1">بكج استيكرات الأنمي (Anime Vibes Pack)</h4>
+                            <p class="text-xs text-slate-500 mb-2">10 استيكرات فينيل بتصاميم أنمي ملونة وجذابة</p>
+                            <div class="text-lg font-black text-red-600 mb-3">50 جنيه</div>
+                        </div>
+                        <button class="btn-hover w-full bg-slate-900 hover:bg-slate-800 text-white py-2 px-3 rounded-full text-xs font-bold flex items-center justify-center gap-1.5" onclick="addStickerOfferToCart(10, 50)">
+                            <i class="fas fa-cart-plus text-amber-400"></i> أضف للسلة (10 قطع)
+                        </button>
+                    </div>
+
+                    <!-- Trending Memes Pack -->
+                    <div class="sticker-card bg-white rounded-3xl p-5 border border-slate-200/80 shadow-sm flex flex-col justify-between rotate-[1.5deg]">
+                        <div class="aspect-square bg-slate-50 rounded-2xl overflow-hidden mb-3 relative flex items-center justify-center p-2">
+                            <span class="absolute top-2 start-2 bg-amber-500 text-white text-[10px] font-black px-2 py-0.5 rounded-md">ميمز</span>
+                            <img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=500&auto=format&fit=crop&q=80" alt="Memes Pack" class="w-full h-full object-cover rounded-xl" onerror="this.src='/logo.png'">
+                        </div>
+                        <div>
+                            <h4 class="font-extrabold text-sm text-slate-800 mb-1">بكج استيكرات الميمز (Trending Memes)</h4>
+                            <p class="text-xs text-slate-500 mb-2">10 استيكرات فكاهية مضحكة وخفيفة لظهر اللابتوب</p>
+                            <div class="text-lg font-black text-red-600 mb-3">50 جنيه</div>
+                        </div>
+                        <button class="btn-hover w-full bg-slate-900 hover:bg-slate-800 text-white py-2 px-3 rounded-full text-xs font-bold flex items-center justify-center gap-1.5" onclick="addStickerOfferToCart(10, 50)">
+                            <i class="fas fa-cart-plus text-amber-400"></i> أضف للسلة (10 قطع)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main All Products Section -->
+    <main class="py-16 flex-grow" id="productsSection">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-10" data-aos="fade-up">
+                <span class="inline-block px-4 py-1 rounded-full bg-red-100 text-red-700 text-xs font-extrabold mb-2 tracking-wide uppercase">كافة الأقسام</span>
+                <h2 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight" data-i18n="ourProducts">منتجاتنا</h2>
+                <div class="w-16 h-1 bg-red-600 rounded-full mx-auto mt-3"></div>
+            </div>
+
+            <!-- Filters & Search Bar -->
+            <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/80 mb-10 max-w-4xl mx-auto" data-aos="fade-up" data-aos-delay="100">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="relative">
+                        <i class="fas fa-search absolute start-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="searchInput" class="w-full ps-10 pe-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-red-500 focus:ring-2 focus:ring-red-200 text-sm font-medium transition outline-none" data-i18n-placeholder="searchPlaceholder" placeholder="ابحث عن منتج..." onkeyup="searchProducts()">
+                    </div>
+
+                    <div class="relative">
+                        <select id="categoryFilter" class="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-red-500 focus:ring-2 focus:ring-red-200 text-sm font-medium transition outline-none cursor-pointer" onchange="filterByCategory()">
+                            <option value="">جميع التصنيفات</option>
+                        </select>
+                    </div>
+
+                    <div class="relative">
+                        <select id="sortSelect" class="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-red-500 focus:ring-2 focus:ring-red-200 text-sm font-medium transition outline-none cursor-pointer" onchange="sortProducts()">
+                            <option value="" data-i18n="sortBy">ترتيب حسب</option>
+                            <option value="price_asc" data-i18n="priceAsc">السعر: من الأقل للأعلى</option>
+                            <option value="price_desc" data-i18n="priceDesc">السعر: من الأعلى للأقل</option>
+                            <option value="name_asc" data-i18n="nameAsc">الاسم: أ-ي</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products Grid Container -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8" id="productsGrid">
+                <!-- Skeleton loader injected dynamically by script.js -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content bg-white rounded-3xl p-6 sm:p-8 w-[92%] max-w-md relative shadow-2xl border border-slate-100">
+            <button class="absolute top-4 end-4 text-slate-400 hover:text-slate-700 text-2xl leading-none w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 transition" onclick="closeLoginModal()">&times;</button>
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl">
+                    <i class="fas fa-sign-in-alt"></i>
+                </div>
+                <h2 class="text-2xl font-black text-slate-900" data-i18n="loginTitle">تسجيل الدخول</h2>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1" data-i18n="email">البريد الإلكتروني</label>
+                    <input type="email" id="loginEmail" class="w-full border border-slate-200 rounded-2xl p-3 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition" data-i18n-placeholder="email" placeholder="example@mail.com">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1" data-i18n="password">كلمة المرور</label>
+                    <input type="password" id="loginPassword" class="w-full border border-slate-200 rounded-2xl p-3 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition" data-i18n-placeholder="password" placeholder="••••••••">
+                </div>
+                <button class="btn-hover w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-full font-bold shadow-lg shadow-red-600/30 transition mt-2" onclick="login()" data-i18n="login">دخول</button>
+            </div>
+            <p class="text-center text-xs text-slate-500 mt-5">
+                <span data-i18n="noAccount">ليس لديك حساب؟</span>
+                <button type="button" class="text-red-600 font-bold hover:underline" onclick="closeLoginModal(); showRegisterModal();" data-i18n="createAccount">إنشاء حساب جديد</button>
+            </p>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content bg-white rounded-3xl p-6 sm:p-8 w-[92%] max-w-md relative shadow-2xl border border-slate-100">
+            <button class="absolute top-4 end-4 text-slate-400 hover:text-slate-700 text-2xl leading-none w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 transition" onclick="closeRegisterModal()">&times;</button>
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h2 class="text-2xl font-black text-slate-900" data-i18n="registerTitle">إنشاء حساب</h2>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1" data-i18n="fullName">الاسم الكامل</label>
+                    <input type="text" id="regName" class="w-full border border-slate-200 rounded-2xl p-3 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition" data-i18n-placeholder="fullName" placeholder="الاسم ثلاثي">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1" data-i18n="email">البريد الإلكتروني</label>
+                    <input type="email" id="regEmail" class="w-full border border-slate-200 rounded-2xl p-3 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition" data-i18n-placeholder="email" placeholder="example@mail.com">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1" data-i18n="password">كلمة المرور</label>
+                    <input type="password" id="regPassword" class="w-full border border-slate-200 rounded-2xl p-3 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition" data-i18n-placeholder="password" placeholder="••••••••">
+                </div>
+                <button class="btn-hover w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-full font-bold shadow-lg shadow-red-600/30 transition mt-2" onclick="register()" data-i18n="register">تسجيل</button>
+            </div>
+            <p class="text-center text-xs text-slate-500 mt-5">
+                <span data-i18n="hasAccount">لديك حساب بالفعل؟</span>
+                <button type="button" class="text-red-600 font-bold hover:underline" onclick="closeRegisterModal(); showLoginModal();" data-i18n="goLogin">تسجيل الدخول</button>
+            </p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-300 mt-auto pt-16 pb-8 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+                <!-- Brand col with Official Logo -->
+                <div class="md:col-span-2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="brand-logo-circle w-11 h-11">
+                            <img src="/logo.png" alt="Clicktopya" onerror="handleLogoError(this)">
+                        </div>
+                        <span class="logo-text font-black text-2xl text-white">Clicktopya</span>
+                    </div>
+                    <p class="text-slate-400 text-sm leading-relaxed max-w-sm" data-i18n="footerTagline">
+                        أضغط واشتري — وجهتك الأولى للتسوق الإلكتروني الأسرع والأسهل في مصر مع تجربة شراء فورية بالدفع عند الاستلام واستيكرات لابتوب فينيل بأعلى جودة.
+                    </p>
+                </div>
+
+                <!-- Quick links -->
+                <div>
+                    <h3 class="text-white font-black text-base mb-4 tracking-wide" data-i18n="quickLinks">روابط سريعة</h3>
+                    <ul class="space-y-2.5 text-sm">
+                        <li><a href="/" class="text-slate-400 hover:text-white transition" data-i18n="home">الرئيسية</a></li>
+                        <li><a href="#stickersSection" class="text-slate-400 hover:text-white transition" data-i18n="stickersNav">استيكرات لابتوب</a></li>
+                        <li><a href="/products" class="text-slate-400 hover:text-white transition" data-i18n="products">المنتجات</a></li>
+                        <li><a href="/categories" class="text-slate-400 hover:text-white transition" data-i18n="categories">التصنيفات</a></li>
+                        <li><a href="/cart" class="text-slate-400 hover:text-white transition" data-i18n="cart">عربة التسوق</a></li>
+                        <li><a href="/orders" class="text-slate-400 hover:text-white transition" data-i18n="myOrders">طلباتي</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact Info -->
+                <div>
+                    <h3 class="text-white font-black text-base mb-4 tracking-wide" data-i18n="contactUs">تواصل معنا</h3>
+                    <ul class="space-y-3 text-sm text-slate-400">
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-phone text-red-500"></i>
+                            <span dir="ltr">01011643099</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fab fa-whatsapp text-emerald-400 text-base"></i>
+                            <a href="https://wa.me/201011643099" target="_blank" class="hover:text-emerald-400 transition" dir="ltr">+20 101 164 3099</a>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-envelope text-red-500"></i>
+                            <span>info@clicktopya.com</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom Copyright & Policies -->
+            <div class="pt-8 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+                <p>
+                    <span>© 2026 </span>
+                    <span data-i18n="copyright">Clicktopya — جميع الحقوق محفوظة</span>
+                </p>
+                <div class="flex items-center gap-4 text-xs">
+                    <span>الدفع عند الاستلام</span>
+                    <span>•</span>
+                    <span>استيكرات فينيل مخصصة</span>
+                    <span>•</span>
+                    <span>طلب فوري عبر واتساب</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script src="/script.js"></script>
+</body>
+</html>

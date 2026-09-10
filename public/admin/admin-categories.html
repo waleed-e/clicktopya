@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة التصنيفات | Clicktopya</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="/logo.png">
+    <style>
+        .upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 14px;
+            padding: 1rem;
+            text-align: center;
+            background: #f8fafc;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .upload-area:hover {
+            border-color: #dc2626;
+            background: #fef2f2;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Tajawal', sans-serif; background: #f3f4f6; }
+        .admin-container { display: flex; min-height: 100vh; }
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #1e1e2f 0%, #2d2d3a 100%);
+            color: white;
+            position: fixed;
+            height: 100vh;
+        }
+        .sidebar-header { padding: 1.5rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-header h2 { font-size: 1.5rem; }
+        .sidebar-menu { padding: 1.5rem 0; }
+        .menu-item {
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #e5e7eb;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .menu-item:hover, .menu-item.active { background: rgba(220,38,38,0.2); color: #dc2626; border-right: 3px solid #dc2626; }
+        .main-content { flex: 1; margin-right: 280px; padding: 2rem; }
+        .top-bar {
+            background: white;
+            border-radius: 15px;
+            padding: 1rem 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn-add { background: #dc2626; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 25px; cursor: pointer; margin-bottom: 1rem; }
+        .table-container { background: white; border-radius: 15px; padding: 1.5rem; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1rem; text-align: right; border-bottom: 1px solid #e5e7eb; }
+        th { background: #f9fafb; color: #6b7280; }
+        .btn-edit, .btn-delete { border: none; padding: 0.3rem 0.8rem; border-radius: 5px; cursor: pointer; margin: 0 0.2rem; }
+        .btn-edit { background: #3b82f6; color: white; }
+        .btn-delete { background: #dc2626; color: white; }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background: white;
+            margin: 10% auto;
+            padding: 2rem;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 15px;
+        }
+        .modal-content input, .modal-content textarea {
+            width: 100%;
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-family: 'Tajawal', sans-serif;
+        }
+        .modal-content button {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+        }
+        .close { float: left; font-size: 1.5rem; cursor: pointer; }
+        .search-box {
+            padding: 0.5rem 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 25px;
+            width: 250px;
+            font-family: 'Tajawal', sans-serif;
+        }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-mouse-pointer"></i> Clicktopya</h2>
+                <p>Admin Dashboard</p>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="/admin" class="menu-item"><i class="fas fa-tachometer-alt"></i> لوحة التحكم</a>
+                <a href="/admin/products" class="menu-item"><i class="fas fa-box"></i> المنتجات</a>
+                <a href="/admin/categories" class="menu-item active"><i class="fas fa-folder"></i> التصنيفات</a>
+                <a href="/admin/offers" class="menu-item"><i class="fas fa-tags"></i> العروض الترويجية</a>
+                <a href="/admin/users" class="menu-item"><i class="fas fa-users"></i> المستخدمين</a>
+                <a href="/admin/orders" class="menu-item"><i class="fas fa-truck"></i> الطلبات</a>
+                <a href="/" class="menu-item"><i class="fas fa-store"></i> الموقع الرئيسي</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <h1>إدارة التصنيفات</h1>
+                <div class="user-info">
+                    <span id="adminName">Admin</span>
+                    <button class="btn-logout" style="background:#dc2626; color:white; border:none; padding:0.5rem 1rem; border-radius:25px; cursor:pointer;" onclick="logout()">تسجيل خروج</button>
+                </div>
+            </div>
+
+            <div class="flex-between">
+                <button class="btn-add" onclick="openAddModal()"><i class="fas fa-plus"></i> إضافة تصنيف جديد</button>
+                <input type="text" id="searchInput" class="search-box" placeholder="بحث عن تصنيف..." onkeyup="searchCategories()">
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>الصورة</th><th>الاسم</th><th>الوصف</th><th>تاريخ الإضافة</th><th>الإجراءات</th></tr>
+                    </thead>
+                    <tbody id="categoriesList">
+                        <tr><td colspan="6" style="text-align:center">جاري التحميل...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div id="categoryModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle" style="margin-bottom: 1.25rem;">إضافة تصنيف جديد</h2>
+            <input type="hidden" id="categoryId">
+            
+            <label style="font-size: 0.8rem; font-weight: 700; color: #475569; display: block; margin-bottom: 0.25rem;">اسم التصنيف *</label>
+            <input type="text" id="categoryName" placeholder="اسم التصنيف" required>
+            
+            <label style="font-size: 0.8rem; font-weight: 700; color: #475569; display: block; margin-bottom: 0.25rem;">وصف التصنيف (اختياري)</label>
+            <textarea id="categoryDescription" placeholder="وصف التصنيف (اختياري)" rows="3"></textarea>
+
+            <!-- Modern Drag & Drop Image Uploader -->
+            <div id="categoryUploaderContainer"></div>
+            <input type="hidden" id="categoryImage">
+
+            <button style="width: 100%; background: #dc2626; color: white; border: none; padding: 0.85rem; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 1rem;" onclick="saveCategory()">حفظ التصنيف</button>
+        </div>
+    </div>
+
+    <script src="/admin/drop-uploader.js"></script>
+    <script>
+        let token = localStorage.getItem('token');
+        let user = JSON.parse(localStorage.getItem('user') || '{}');
+        let categories = [];
+
+        if (!token || !user.isAdmin) {
+            window.location.href = '/login';
+        }
+
+        document.getElementById('adminName').textContent = user.name;
+
+        async function loadCategories() {
+            try {
+                const res = await fetch('/api/categories');
+                categories = await res.json();
+                displayCategories(categories);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('categoriesList').innerHTML = '<tr><td colspan="6" style="text-align:center">خطأ في تحميل البيانات</td></tr>';
+            }
+        }
+
+        function displayCategories(categoriesToShow) {
+            const tbody = document.getElementById('categoriesList');
+            if (!categoriesToShow || categoriesToShow.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">لا توجد تصنيفات</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = categoriesToShow.map((cat, index) => `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>
+                        ${cat.image ? `
+                            <img src="${cat.image}" alt="${cat.name}" style="width:36px; height:36px; object-fit:cover; border-radius:8px; border:1px solid #e2e8f0;">
+                        ` : `
+                            <div style="width:36px; height:36px; background:#fef2f2; color:#dc2626; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                                <i class="fas fa-folder"></i>
+                            </div>
+                        `}
+                    </td>
+                    <td><strong style="color:#0f172a;">${cat.name}</strong></td>
+                    <td>${cat.description || '-'}</td>
+                    <td>${new Date(cat.created_at).toLocaleDateString('ar-EG')}</td>
+                    <td>
+                        <button class="btn-edit" onclick="editCategory('${cat._id}')" title="تعديل"><i class="fas fa-edit"></i></button>
+                        <button class="btn-delete" onclick="deleteCategory('${cat._id}')" title="حذف"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function searchCategories() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = categories.filter(cat => cat.name.toLowerCase().includes(term));
+            displayCategories(filtered);
+        }
+
+        let categoryDropUploader;
+        window.addEventListener('DOMContentLoaded', () => {
+            categoryDropUploader = new ImageDropUploader({
+                containerId: 'categoryUploaderContainer',
+                hiddenInputId: 'categoryImage',
+                label: 'أيقونة أو صورة التصنيف (اختياري)',
+                maxSizeMB: 5
+            });
+        });
+
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = 'إضافة تصنيف جديد';
+            document.getElementById('categoryId').value = '';
+            document.getElementById('categoryName').value = '';
+            document.getElementById('categoryDescription').value = '';
+            if (categoryDropUploader) {
+                categoryDropUploader.clear();
+            }
+            document.getElementById('categoryModal').style.display = 'block';
+        }
+
+        async function editCategory(id) {
+            const category = categories.find(cat => cat._id === id);
+            if (category) {
+                document.getElementById('modalTitle').textContent = 'تعديل التصنيف';
+                document.getElementById('categoryId').value = category._id;
+                document.getElementById('categoryName').value = category.name;
+                document.getElementById('categoryDescription').value = category.description || '';
+                
+                if (categoryDropUploader) {
+                    if (category.image) {
+                        categoryDropUploader.setValue(category.image, category.name || 'صورة التصنيف');
+                    } else {
+                        categoryDropUploader.clear();
+                    }
+                }
+
+                document.getElementById('categoryModal').style.display = 'block';
+            }
+        }
+
+        async function saveCategory() {
+            const id = document.getElementById('categoryId').value;
+            const name = document.getElementById('categoryName').value.trim();
+
+            if (!name) {
+                alert('برجاء إدخال اسم التصنيف');
+                return;
+            }
+
+            const categoryData = {
+                name,
+                description: document.getElementById('categoryDescription').value.trim(),
+                image: document.getElementById('categoryImage').value
+            };
+
+            try {
+                const url = id ? `/api/categories/${id}` : '/api/categories';
+                const method = id ? 'PUT' : 'POST';
+
+                const res = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(categoryData)
+                });
+
+                if (res.ok) {
+                    closeModal();
+                    loadCategories();
+                    alert(id ? 'تم تعديل التصنيف بنجاح' : 'تم إضافة التصنيف بنجاح');
+                } else {
+                    const error = await res.json();
+                    alert(error.message || 'حدث خطأ');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('خطأ في الاتصال بالخادم');
+            }
+        }
+
+        async function deleteCategory(id) {
+            try {
+                const productsRes = await fetch('/api/products');
+                const products = await productsRes.json();
+                const hasProducts = products.some(p => p.cat_id?._id === id || p.cat_id === id);
+
+                if (hasProducts) {
+                    alert('لا يمكن حذف هذا التصنيف لوجود منتجات تابعة له');
+                    return;
+                }
+
+                if (confirm('هل أنت متأكد من حذف هذا التصنيف؟')) {
+                    const res = await fetch(`/api/categories/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    if (res.ok) {
+                        loadCategories();
+                        alert('تم حذف التصنيف بنجاح');
+                    } else {
+                        const error = await res.json();
+                        alert(error.message || 'فشل حذف التصنيف');
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('خطأ في الاتصال بالخادم');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('categoryModal').style.display = 'none';
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        }
+
+        loadCategories();
+    </script>
+</body>
+</html>

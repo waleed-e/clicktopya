@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة المستخدمين | Clicktopya</title>
+    <link rel="icon" type="image/png" href="/logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Tajawal', sans-serif; background: #f3f4f6; }
+        .admin-container { display: flex; min-height: 100vh; }
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #1e1e2f 0%, #2d2d3a 100%);
+            color: white;
+            position: fixed;
+            height: 100vh;
+        }
+        .sidebar-header { padding: 1.5rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-header h2 { font-size: 1.5rem; }
+        .sidebar-menu { padding: 1.5rem 0; }
+        .menu-item {
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #e5e7eb;
+            text-decoration: none;
+        }
+        .menu-item:hover, .menu-item.active { background: rgba(220,38,38,0.2); color: #dc2626; border-right: 3px solid #dc2626; }
+        .main-content { flex: 1; margin-right: 280px; padding: 2rem; }
+        .top-bar {
+            background: white;
+            border-radius: 15px;
+            padding: 1rem 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .table-container { background: white; border-radius: 15px; padding: 1.5rem; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1rem; text-align: right; border-bottom: 1px solid #e5e7eb; }
+        th { background: #f9fafb; color: #6b7280; }
+        .badge-admin { background: #dc2626; color: white; padding: 0.2rem 0.8rem; border-radius: 20px; font-size: 0.8rem; }
+        .badge-user { background: #22c55e; color: white; padding: 0.2rem 0.8rem; border-radius: 20px; font-size: 0.8rem; }
+        .btn-toggle { background: #3b82f6; color: white; border: none; padding: 0.3rem 0.8rem; border-radius: 5px; cursor: pointer; }
+        .search-box {
+            padding: 0.5rem 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 25px;
+            width: 250px;
+            font-family: 'Tajawal', sans-serif;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-mouse-pointer"></i> Clicktopya</h2>
+                <p>Admin Dashboard</p>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="/admin" class="menu-item"><i class="fas fa-tachometer-alt"></i> لوحة التحكم</a>
+                <a href="/admin/products" class="menu-item"><i class="fas fa-box"></i> المنتجات</a>
+                <a href="/admin/categories" class="menu-item"><i class="fas fa-folder"></i> التصنيفات</a>
+                <a href="/admin/offers" class="menu-item"><i class="fas fa-tags"></i> العروض الترويجية</a>
+                <a href="/admin/users" class="menu-item active"><i class="fas fa-users"></i> المستخدمين</a>
+                <a href="/admin/orders" class="menu-item"><i class="fas fa-truck"></i> الطلبات</a>
+                <a href="/" class="menu-item"><i class="fas fa-store"></i> الموقع الرئيسي</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <h1>إدارة المستخدمين</h1>
+                <div class="user-info">
+                    <span id="adminName">Admin</span>
+                    <button class="btn-logout" style="background:#dc2626; color:white; border:none; padding:0.5rem 1rem; border-radius:25px; cursor:pointer;" onclick="logout()">تسجيل خروج</button>
+                </div>
+            </div>
+
+            <input type="text" id="searchInput" class="search-box" placeholder="بحث عن مستخدم..." onkeyup="searchUsers()">
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>الاسم</th><th>البريد الإلكتروني</th><th>الدور</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr>
+                    </thead>
+                    <tbody id="usersList">
+                        <tr><td colspan="6" style="text-align:center">جاري التحميل...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let token = localStorage.getItem('token');
+        let user = JSON.parse(localStorage.getItem('user') || '{}');
+        let users = [];
+
+        if (!token || !user.isAdmin) window.location.href = '/login';
+        document.getElementById('adminName').textContent = user.name;
+
+        async function loadUsers() {
+            try {
+                const res = await fetch('/api/users', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    users = await res.json();
+                    displayUsers(users);
+                } else {
+                    document.getElementById('usersList').innerHTML = '<tr><td colspan="6" style="text-align:center">خطأ في تحميل البيانات</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function displayUsers(usersToShow) {
+            const tbody = document.getElementById('usersList');
+            if (usersToShow.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">لا توجد مستخدمين</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = usersToShow.map((u, index) => `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><strong>${u.name}</strong></td>
+                    <td>${u.email}</td>
+                    <td><span class="${u.isAdmin ? 'badge-admin' : 'badge-user'}">${u.isAdmin ? 'أدمن' : 'مستخدم'}</span></td>
+                    <td>${new Date(u.createdAt).toLocaleDateString('ar-EG')}</td>
+                    <td>
+                        <button class="btn-toggle" onclick="toggleAdmin('${u._id}', ${u.isAdmin})">
+                            ${u.isAdmin ? 'إزالة الصلاحية' : 'جعله أدمن'}
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function searchUsers() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = users.filter(u => u.name.toLowerCase().includes(term) || u.email.toLowerCase().includes(term));
+            displayUsers(filtered);
+        }
+
+        async function toggleAdmin(id, currentStatus) {
+            if (confirm(`هل أنت متأكد من ${currentStatus ? 'إزالة صلاحية الأدمن عن' : 'منح صلاحية الأدمن ل'} هذا المستخدم؟`)) {
+                try {
+                    const res = await fetch(`/api/users/${id}/toggle-admin`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+
+                    if (res.ok) {
+                        loadUsers();
+                        alert('تم تحديث صلاحية المستخدم بنجاح');
+                    } else {
+                        alert('فشل تحديث الصلاحية');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('خطأ في الاتصال بالخادم');
+                }
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        }
+
+        loadUsers();
+    </script>
+</body>
+</html>

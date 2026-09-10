@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة العروض الترويجية | Clicktopya Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="/logo.png">
+    <style>
+        .upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 14px;
+            padding: 1rem;
+            text-align: center;
+            background: #f8fafc;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .upload-area:hover {
+            border-color: #dc2626;
+            background: #fef2f2;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 50;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.3rem;
+            font-weight: 800;
+        }
+
+        .sidebar-header p {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-top: 0.25rem;
+        }
+
+        .sidebar-menu {
+            padding: 1.5rem 0;
+        }
+
+        .menu-item {
+            padding: 0.85rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background: rgba(220,38,38,0.15);
+            color: #ef4444;
+            border-right: 4px solid #ef4444;
+        }
+
+        .menu-item i {
+            width: 24px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-right: 280px;
+            padding: 2rem;
+        }
+
+        .top-bar {
+            background: white;
+            border-radius: 20px;
+            padding: 1.25rem 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .top-bar h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+
+        /* Header Actions */
+        .page-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .btn-primary {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #b91c1c;
+            transform: translateY(-1px);
+        }
+
+        /* Table Container */
+        .table-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: right;
+        }
+
+        th, td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #64748b;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        tr:hover td {
+            background: #fcfdfe;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.3rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .status-active {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .status-scheduled {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+
+        .status-expired {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .status-disabled {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        /* Actions */
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.4rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.15s;
+        }
+
+        .edit-btn { color: #2563eb; }
+        .edit-btn:hover { background: #eff6ff; }
+        .del-btn { color: #dc2626; }
+        .del-btn:hover { background: #fef2f2; }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal-box {
+            background: white;
+            border-radius: 24px;
+            width: 100%;
+            max-w: 600px;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2rem;
+            position: relative;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #334155;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            background: #f8fafc;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus {
+            background: white;
+            border-color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* Alert Toast */
+        .alert-toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            background: #0f172a;
+            color: white;
+            padding: 0.85rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            z-index: 200;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(100%);
+                transition: transform 0.3s;
+            }
+            .main-content {
+                margin-right: 0;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Clicktopya</h2>
+                <p>لوحة التحكم الإدارية</p>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="/admin" class="menu-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>لوحة التحكم</span>
+                </a>
+                <a href="/admin/products" class="menu-item">
+                    <i class="fas fa-box"></i>
+                    <span>المنتجات</span>
+                </a>
+                <a href="/admin/categories" class="menu-item">
+                    <i class="fas fa-folder"></i>
+                    <span>التصنيفات</span>
+                </a>
+                <a href="/admin/offers" class="menu-item active">
+                    <i class="fas fa-tags"></i>
+                    <span>العروض الترويجية</span>
+                </a>
+                <a href="/admin/users" class="menu-item">
+                    <i class="fas fa-users"></i>
+                    <span>المستخدمين</span>
+                </a>
+                <a href="/admin/orders" class="menu-item">
+                    <i class="fas fa-truck"></i>
+                    <span>الطلبات</span>
+                </a>
+                <a href="/" class="menu-item">
+                    <i class="fas fa-store"></i>
+                    <span>الموقع الرئيسي</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="top-bar">
+                <h1>إدارة العروض الترويجية</h1>
+                <div class="user-info">
+                    <span id="adminName" style="font-weight: 700;">Admin</span>
+                    <button class="logout-btn" onclick="logout()">خروج</button>
+                </div>
+            </div>
+
+            <div class="page-actions">
+                <div>
+                    <p style="color: #64748b; font-size: 0.9rem;">
+                        تحكم في العروض الخاصة التي تظهر في قسم "أحدث العروض" بالصفحة الرئيسية مع تواريخ صلاحية دقيقة.
+                    </p>
+                </div>
+                <button class="btn-primary" onclick="openCreateModal()">
+                    <i class="fas fa-plus"></i>
+                    <span>إضافة عرض جديد</span>
+                </button>
+            </div>
+
+            <!-- Table -->
+            <div class="table-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الصورة</th>
+                            <th>العرض</th>
+                            <th>قيمة الخصم</th>
+                            <th>فترة العرض</th>
+                            <th>الحالة</th>
+                            <th>مفعل</th>
+                            <th style="text-align: center;">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="offersList">
+                        <tr><td colspan="7" style="text-align: center; color: #94a3b8; padding: 2rem;">جاري تحميل العروض...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Create/Edit Modal -->
+    <div id="offerModal" class="modal">
+        <div class="modal-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h3 id="modalTitle" style="font-size: 1.25rem; font-weight: 800; color: #0f172a;">إضافة عرض ترويجي جديد</h3>
+                <button type="button" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #94a3b8;" onclick="closeOfferModal()">&times;</button>
+            </div>
+
+            <form id="offerForm" onsubmit="saveOffer(event)">
+                <input type="hidden" id="offerId">
+
+                <div class="form-group">
+                    <label>عنوان العرض *</label>
+                    <input type="text" id="offerTitle" class="form-control" placeholder="مثال: خصم 20% على استيكرات اللابتوب" required>
+                </div>
+
+                <div class="form-group">
+                    <label>تفاصيل ووصف العرض (اختياري)</label>
+                    <textarea id="offerDescription" class="form-control" rows="3" placeholder="اشرح تفاصيل العرض وشروطه باختصار..."></textarea>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>شارة الخصم / القيمة (اختياري)</label>
+                        <input type="text" id="offerDiscount" class="form-control" placeholder="مثال: خصم 20% أو وفر 50 ج">
+                    </div>
+                    <div class="form-group">
+                        <!-- Modern Drag & Drop Image Uploader -->
+                        <div id="offerUploaderContainer"></div>
+                        <input type="hidden" id="offerImage">
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>تاريخ ووقت البداية *</label>
+                        <input type="datetime-local" id="offerStartDate" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>تاريخ ووقت النهاية *</label>
+                        <input type="datetime-local" id="offerEndDate" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>نص زر التوجيه (CTA)</label>
+                        <input type="text" id="offerCtaText" class="form-control" value="تسوق العرض">
+                    </div>
+                    <div class="form-group">
+                        <label>رابط الزر (CTA Link)</label>
+                        <input type="text" id="offerCtaLink" class="form-control" value="/#stickersSection">
+                    </div>
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+                    <input type="checkbox" id="offerActive" checked style="width: 18px; height: 18px; accent-color: #dc2626;">
+                    <label for="offerActive" style="margin-bottom: 0; cursor: pointer;">تفعيل العرض فوراً</label>
+                </div>
+
+                <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn-primary" style="flex: 1; justify-content: center;">
+                        <span id="saveBtnText">حفظ العرض</span>
+                    </button>
+                    <button type="button" class="btn-primary" style="background: #f1f5f9; color: #475569; box-shadow: none;" onclick="closeOfferModal()">
+                        إلغاء
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast" class="alert-toast"></div>
+
+    <script src="/admin/drop-uploader.js"></script>
+    <script>
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+        if (!token || !user.isAdmin) {
+            window.location.href = '/login';
+        }
+
+        document.getElementById('adminName').textContent = user.name || 'Admin';
+
+        let allOffers = [];
+
+        let offerDropUploader;
+        document.addEventListener('DOMContentLoaded', () => {
+            loadOffers();
+            offerDropUploader = new ImageDropUploader({
+                containerId: 'offerUploaderContainer',
+                hiddenInputId: 'offerImage',
+                label: 'صورة أو بانر العرض (اختياري)',
+                maxSizeMB: 5
+            });
+        });
+
+        function showAdminToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
+
+        async function loadOffers() {
+            try {
+                const res = await fetch('/api/offers/all', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    allOffers = await res.json();
+                    renderOffersTable(allOffers);
+                } else {
+                    showAdminToast('فشل جلب العروض من الخادم');
+                }
+            } catch (err) {
+                console.error(err);
+                showAdminToast('خطأ في الاتصال بالخادم');
+            }
+        }
+
+        function renderOffersTable(offers) {
+            const tbody = document.getElementById('offersList');
+            if (!offers || offers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #94a3b8; padding: 2rem;">لا توجد عروض مسجلة حالياً</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = offers.map(offer => {
+                const startStr = new Date(offer.startDate).toLocaleDateString('ar-EG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                const endStr = new Date(offer.endDate).toLocaleDateString('ar-EG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+                let statusBadge = '';
+                switch (offer.computedStatus) {
+                    case 'active':
+                        statusBadge = '<span class="status-badge status-active"><i class="fas fa-check-circle"></i> ساري الآن</span>';
+                        break;
+                    case 'scheduled':
+                        statusBadge = '<span class="status-badge status-scheduled"><i class="fas fa-hourglass-half"></i> مجدول</span>';
+                        break;
+                    case 'expired':
+                        statusBadge = '<span class="status-badge status-expired"><i class="fas fa-clock"></i> منتهي الصلاحية</span>';
+                        break;
+                    default:
+                        statusBadge = '<span class="status-badge status-disabled"><i class="fas fa-ban"></i> معطل</span>';
+                }
+
+                return `
+                    <tr>
+                        <td>
+                            ${offer.image ? `
+                                <img src="${offer.image}" alt="${offer.title}" style="width: 44px; height: 44px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0;">
+                            ` : `
+                                <div style="width: 44px; height: 44px; background: #fef2f2; color: #dc2626; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
+                                    <i class="fas fa-gift"></i>
+                                </div>
+                            `}
+                        </td>
+                        <td>
+                            <strong style="color: #0f172a; display: block;">${offer.title}</strong>
+                            <span style="font-size: 0.8rem; color: #64748b;">${(offer.description || '').length > 50 ? (offer.description || '').slice(0, 50) + '...' : (offer.description || '-')}</span>
+                        </td>
+                        <td>
+                            <span style="background: #fef2f2; color: #dc2626; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 0.8rem;">
+                                ${offer.discount || 'عرض خاص'}
+                            </span>
+                        </td>
+                        <td style="font-size: 0.8rem; color: #475569;">
+                            <div>من: ${startStr}</div>
+                            <div>إلى: ${endStr}</div>
+                        </td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            <label class="switch">
+                                <input type="checkbox" ${offer.active ? 'checked' : ''} onchange="toggleOfferActive('${offer._id}', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                        </td>
+                        <td style="text-align: center;">
+                            <button class="btn-sm btn-edit" onclick="openEditModal('${offer._id}')" title="تعديل"><i class="fas fa-edit"></i></button>
+                            <button class="btn-sm btn-delete" onclick="deleteOffer('${offer._id}')" title="حذف"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function toggleOfferActive(id, active) {
+            try {
+                const res = await fetch(`/api/offers/${id}/toggle`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ active })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showAdminToast(active ? 'تم تفعيل العرض' : 'تم تعطيل العرض');
+                    loadOffers();
+                } else {
+                    showAdminToast(data.message || 'فشل تغيير حالة العرض');
+                    loadOffers();
+                }
+            } catch (err) {
+                showAdminToast('خطأ أثناء تحديث الحالة');
+                loadOffers();
+            }
+        }
+
+        function openCreateModal() {
+            document.getElementById('offerId').value = '';
+            document.getElementById('modalTitle').textContent = 'إضافة عرض ترويجي جديد';
+            document.getElementById('saveBtnText').textContent = 'حفظ العرض';
+            document.getElementById('offerForm').reset();
+            if (offerDropUploader) {
+                offerDropUploader.clear();
+            }
+            document.getElementById('offerActive').checked = true;
+            document.getElementById('offerCtaText').value = 'تسوق العرض';
+            document.getElementById('offerCtaLink').value = '/#stickersSection';
+
+            // Set default start = now, end = 7 days from now
+            const now = new Date();
+            const in7Days = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+            document.getElementById('offerStartDate').value = now.toISOString().slice(0, 16);
+            document.getElementById('offerEndDate').value = in7Days.toISOString().slice(0, 16);
+
+            document.getElementById('offerModal').classList.add('open');
+        }
+
+        function openEditModal(id) {
+            const offer = allOffers.find(o => o._id === id);
+            if (!offer) return;
+
+            document.getElementById('offerId').value = offer._id;
+            document.getElementById('modalTitle').textContent = 'تعديل العرض الترويجي';
+            document.getElementById('saveBtnText').textContent = 'حفظ التعديلات';
+            document.getElementById('offerTitle').value = offer.title;
+            document.getElementById('offerDescription').value = offer.description || '';
+            document.getElementById('offerDiscount').value = offer.discount || '';
+            
+            if (offerDropUploader) {
+                if (offer.image) {
+                    offerDropUploader.setValue(offer.image, offer.title || 'صورة العرض');
+                } else {
+                    offerDropUploader.clear();
+                }
+            }
+
+            document.getElementById('offerStartDate').value = new Date(offer.startDate).toISOString().slice(0, 16);
+            document.getElementById('offerEndDate').value = new Date(offer.endDate).toISOString().slice(0, 16);
+            document.getElementById('offerCtaText').value = offer.ctaText || 'تسوق العرض';
+            document.getElementById('offerCtaLink').value = offer.ctaLink || '/#stickersSection';
+            document.getElementById('offerActive').checked = Boolean(offer.active);
+
+            document.getElementById('offerModal').classList.add('open');
+        }
+
+        function closeOfferModal() {
+            document.getElementById('offerModal').classList.remove('open');
+        }
+
+        async function saveOffer(e) {
+            e.preventDefault();
+            const id = document.getElementById('offerId').value;
+            const startVal = document.getElementById('offerStartDate').value;
+            const endVal = document.getElementById('offerEndDate').value;
+
+            if (new Date(endVal) <= new Date(startVal)) {
+                showAdminToast('تاريخ نهاية العرض يجب أن يكون بعد تاريخ البداية');
+                return;
+            }
+
+            const payload = {
+                title: document.getElementById('offerTitle').value,
+                description: document.getElementById('offerDescription').value,
+                discount: document.getElementById('offerDiscount').value,
+                image: document.getElementById('offerImage').value,
+                startDate: new Date(startVal),
+                endDate: new Date(endVal),
+                ctaText: document.getElementById('offerCtaText').value,
+                ctaLink: document.getElementById('offerCtaLink').value,
+                active: document.getElementById('offerActive').checked
+            };
+
+            const url = id ? `/api/offers/${id}` : '/api/offers';
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+                const res = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    closeOfferModal();
+                    showAdminToast(id ? 'تم تعديل العرض بنجاح' : 'تم إنشاء العرض بنجاح');
+                    loadOffers();
+                } else {
+                    showAdminToast(data.message || 'فشل حفظ العرض');
+                }
+            } catch (err) {
+                console.error(err);
+                showAdminToast('حدث خطأ في الاتصال بالخادم');
+            }
+        }
+
+        async function toggleOffer(id) {
+            try {
+                const res = await fetch(`/api/offers/${id}/toggle`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    showAdminToast('تم تحديث حالة العرض');
+                    loadOffers();
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function deleteOffer(id) {
+            if (!confirm('هل أنت متأكد من حذف هذا العرض الترويجي؟')) return;
+            try {
+                const res = await fetch(`/api/offers/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    showAdminToast('تم حذف العرض بنجاح');
+                    loadOffers();
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+        }
+    </script>
+</body>
+</html>

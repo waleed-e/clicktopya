@@ -204,8 +204,13 @@ class ImageDropUploader {
     this.removeBtn = this.container.querySelector('.drop-btn-remove');
     this.errorEl = this.container.querySelector('.drop-zone-error');
 
+    // Prevent clicking on file input from re-triggering dropZone click
+    this.fileInput.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+
     // Click drop zone opens file picker
-    this.dropZone.addEventListener('click', () => {
+    this.dropZone.addEventListener('click', (e) => {
       if (!this.isUploading) {
         this.fileInput.click();
       }
@@ -286,8 +291,13 @@ class ImageDropUploader {
   }
 
   validateFile(file) {
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
-    if (!validTypes.includes(file.type.toLowerCase())) {
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
+    const ext = file.name.split('.').pop().toLowerCase();
+    const validExts = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'];
+
+    const isValidType = validTypes.includes((file.type || '').toLowerCase()) || validExts.includes(ext);
+
+    if (!isValidType) {
       this.showError('نوع الملف غير مدعوم. الصيغ المسموحة: JPG, PNG, WEBP, GIF');
       return false;
     }
@@ -309,15 +319,14 @@ class ImageDropUploader {
       return;
     }
 
-    // Read base64
+    // Show immediate local preview using object URL so user sees their image instantly
+    const objectUrl = URL.createObjectURL(file);
+    this.showPreview(objectUrl, file.name, file.size);
+
+    // Read base64 for uploading to server
     const reader = new FileReader();
     reader.onload = async (e) => {
       const dataUrl = e.target.result;
-
-      // Show immediate preview
-      this.showPreview(dataUrl, file.name, file.size);
-
-      // Start upload
       await this.uploadToServer(dataUrl, file.name);
     };
 

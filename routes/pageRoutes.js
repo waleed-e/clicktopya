@@ -7,6 +7,7 @@ router.get('/products', pageController.products);
 router.get('/products/category/:categoryName', pageController.productsByCategory);
 router.get('/products/:id', pageController.productDetail);
 router.get('/categories', pageController.categories);
+router.get('/stickers', pageController.stickers);
 router.get('/cart', pageController.cart);
 router.get('/orders', pageController.orders);
 router.get('/login', pageController.login);

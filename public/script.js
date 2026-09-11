@@ -1012,7 +1012,7 @@ function displayCart() {
                     <button class="btn-hover bg-red-600 hover:bg-red-700 text-white px-8 py-3.5 rounded-full font-bold shadow-lg shadow-red-600/30 transition text-sm" onclick="window.location.href='/products'">
                         <i class="fas fa-arrow-right me-1"></i> ${t('continueShopping')}
                     </button>
-                    <button class="btn-hover bg-slate-800 hover:bg-slate-900 text-white px-8 py-3.5 rounded-full font-bold transition text-sm" onclick="window.location.href='/#stickersSection'">
+                    <button class="btn-hover bg-slate-800 hover:bg-slate-900 text-white px-8 py-3.5 rounded-full font-bold transition text-sm" onclick="window.location.href='/stickers'">
                         <i class="fas fa-fire text-amber-400 me-1"></i> تصفح استيكرات اللابتوب
                     </button>
                 </div>
@@ -1384,7 +1384,7 @@ function scrollToStickers() {
     if (stickersSection) {
         stickersSection.scrollIntoView({ behavior: 'smooth' });
     } else {
-        window.location.href = '/#stickersSection';
+        window.location.href = '/stickers';
     }
 }
 

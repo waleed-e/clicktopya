@@ -13,6 +13,7 @@ exports.products = sendPage('products.html');
 exports.productsByCategory = sendPage('products.html');
 exports.productDetail = sendPage('product.html');
 exports.categories = sendPage('categories.html');
+exports.stickers = sendPage('stickers.html');
 exports.cart = sendPage('cart.html');
 exports.login = sendPage('login.html');
 exports.register = sendPage('register.html');

@@ -552,12 +552,12 @@ function closeRegister() { closeRegisterModal(); }
 // ============= Products Functions =============
 function renderProductSkeleton() {
     return Array.from({ length: 8 }).map(() => `
-        <div class="rounded-3xl bg-white shadow-sm border border-slate-200/70 overflow-hidden">
-            <div class="h-52 skeleton-shimmer"></div>
-            <div class="p-5 space-y-3">
-                <div class="h-5 skeleton-shimmer rounded-full w-3/4"></div>
-                <div class="h-4 skeleton-shimmer rounded-full w-1/2"></div>
-                <div class="h-10 skeleton-shimmer rounded-full mt-4"></div>
+        <div class="rounded-xl sm:rounded-3xl bg-white shadow-sm border border-slate-200/70 overflow-hidden">
+            <div class="aspect-square skeleton-shimmer"></div>
+            <div class="p-2 sm:p-5 space-y-2">
+                <div class="h-3 sm:h-5 skeleton-shimmer rounded-full w-3/4"></div>
+                <div class="h-2.5 sm:h-4 skeleton-shimmer rounded-full w-1/2"></div>
+                <div class="h-6 sm:h-10 skeleton-shimmer rounded-lg sm:rounded-full mt-2 sm:mt-4"></div>
             </div>
         </div>
     `).join('');
@@ -666,27 +666,28 @@ function displayProducts(productsToShow) {
         const isSticker = categoryName.toLowerCase().includes('sticker') || product.name.includes('استيكر');
 
         return `
-            <article class="product-card card-enter group bg-white rounded-3xl overflow-hidden border ${isSticker ? 'border-red-200/90 shadow-red-500/5' : 'border-slate-200/80'} shadow-sm flex flex-col justify-between" style="animation-delay:${index * 35}ms">
-                <a href="/products/${product._id}" class="block relative overflow-hidden bg-slate-50 aspect-square flex items-center justify-center p-4">
+            <article class="product-card card-enter group bg-white rounded-2xl sm:rounded-3xl overflow-hidden border ${isSticker ? 'border-red-200/90 shadow-red-500/5' : 'border-slate-200/80'} shadow-sm flex flex-col justify-between" style="animation-delay:${index * 35}ms">
+                <a href="/products/${product._id}" class="card-media block relative overflow-hidden bg-slate-50 aspect-square flex items-center justify-center p-1 sm:p-4">
                     <img src="${img}" alt="${product.name}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" onerror="this.src='/logo.png'">
-                    ${categoryName ? `<span class="absolute top-3 start-3 ${isSticker ? 'bg-red-600 text-white' : 'bg-white/95 text-slate-700'} text-xs font-black px-2.5 py-1 rounded-full shadow-sm">${categoryName}</span>` : ''}
-                    ${isSticker ? '<span class="absolute top-3 end-3 bg-amber-400 text-slate-900 text-[10px] font-black px-2 py-0.5 rounded-md shadow-xs">فينيل ضد الماء</span>' : ''}
+                    ${categoryName ? `<span class="hidden sm:inline-block absolute top-3 start-3 ${isSticker ? 'bg-red-600 text-white' : 'bg-white/95 text-slate-700'} text-xs font-black px-2.5 py-1 rounded-full shadow-sm">${categoryName}</span>` : ''}
+                    ${isSticker ? '<span class="hidden sm:inline-block absolute top-3 end-3 bg-amber-400 text-slate-900 text-[10px] font-black px-2 py-0.5 rounded-md shadow-xs">فينيل ضد الماء</span>' : ''}
                 </a>
-                <div class="p-5 flex flex-col flex-grow justify-between text-start">
+                <div class="card-body p-2 sm:p-5 flex flex-col flex-grow justify-between text-start">
                     <div>
-                        <h3 class="text-base font-extrabold text-slate-800 mb-1 line-clamp-2 hover:text-red-600 transition">
+                        <h3 class="card-title text-xs sm:text-base font-extrabold text-slate-800 mb-1 line-clamp-2 hover:text-red-600 transition">
                             <a href="/products/${product._id}">${product.name}</a>
                         </h3>
-                        <div class="flex items-center justify-between my-2">
-                            <span class="text-xl font-black text-red-600">${formatPrice(product.price)}</span>
-                            <span class="text-xs font-bold px-2 py-0.5 rounded-full ${isAvailable ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-rose-50 text-rose-600 border border-rose-100'}">
+                        <div class="flex items-center justify-between my-1 sm:my-2">
+                            <span class="card-price text-xs sm:text-xl font-black text-red-600">${formatPrice(product.price)}</span>
+                            <span class="hidden sm:inline-block text-xs font-bold px-2 py-0.5 rounded-full ${isAvailable ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-rose-50 text-rose-600 border border-rose-100'}">
                                 ${isAvailable ? t('inStock') : t('outOfStock')}
                             </span>
                         </div>
                     </div>
-                    <button class="btn-hover mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-2.5 px-4 rounded-full font-bold text-sm shadow-md shadow-red-600/20 flex items-center justify-center gap-2 transition" onclick="addToCart('${product._id}')">
-                        <i class="fas fa-cart-plus"></i>
-                        <span>${t('addToCart')}</span>
+                    <button class="card-btn btn-hover mt-1.5 sm:mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-1.5 sm:py-2.5 px-2 sm:px-4 rounded-xl sm:rounded-full font-bold text-xs sm:text-sm shadow-md shadow-red-600/20 flex items-center justify-center gap-1.5 transition" onclick="addToCart('${product._id}')" title="${t('addToCart')}">
+                        <i class="fas fa-cart-plus text-xs sm:text-sm"></i>
+                        <span class="hidden sm:inline">${t('addToCart')}</span>
+                        <span class="sm:hidden text-[10px]">أضف</span>
                     </button>
                 </div>
             </article>

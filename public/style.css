@@ -125,6 +125,55 @@ body {
     left: -4px;
 }
 
+/* ========================================================
+   Responsive 4-column Mobile Product Grid (25% per card)
+   ======================================================== */
+@media (max-width: 639px) {
+    #productsGrid {
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 6px !important;
+    }
+
+    .product-card {
+        border-radius: 14px !important;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+        border-width: 1px !important;
+    }
+
+    .product-card .card-media {
+        padding: 4px !important;
+        border-radius: 12px 12px 0 0 !important;
+    }
+
+    .product-card .card-body {
+        padding: 6px 4px 8px 4px !important;
+    }
+
+    .product-card .card-title {
+        font-size: 10.5px !important;
+        line-height: 1.25 !important;
+        height: 26px !important;
+        margin-bottom: 2px !important;
+        -webkit-line-clamp: 2 !important;
+        display: -webkit-box !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+    }
+
+    .product-card .card-price {
+        font-size: 11px !important;
+        font-weight: 900 !important;
+    }
+
+    .product-card .card-btn {
+        padding: 4px 6px !important;
+        font-size: 10px !important;
+        border-radius: 8px !important;
+        margin-top: 4px !important;
+    }
+}
+
 /* Modals */
 .modal {
     display: none;

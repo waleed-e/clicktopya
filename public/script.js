@@ -878,13 +878,7 @@ function addCustomStickerToCart() {
     }
 
     localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartCount();
-
-    document.querySelectorAll('.cart-badge').forEach(b => {
-        b.classList.add('bump');
-        setTimeout(() => b.classList.remove('bump'), 300);
-    });
-
+    updateCartCount(true);
     showToast(t('addedToCart'));
 }
 
@@ -915,13 +909,7 @@ function addStickerOfferToCart(offerCount, offerPrice) {
     }
 
     localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartCount();
-
-    document.querySelectorAll('.cart-badge').forEach(b => {
-        b.classList.add('bump');
-        setTimeout(() => b.classList.remove('bump'), 300);
-    });
-
+    updateCartCount(true);
     showToast(`تمت إضافة ${offerName} للسلة بنجاح!`);
 }
 
@@ -945,23 +933,34 @@ function addToCart(productId) {
     }
 
     localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartCount();
-
-    document.querySelectorAll('.cart-badge').forEach(b => {
-        b.classList.add('bump');
-        setTimeout(() => b.classList.remove('bump'), 300);
-    });
-
+    updateCartCount(true);
     showToast(t('addedToCart'));
 }
 
-function updateCartCount() {
+function updateCartCount(animate = false) {
     cart = JSON.parse(localStorage.getItem('cart')) || [];
     const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-    const cartCountSpans = document.querySelectorAll('#cartCount, #cartCountMobile');
+    const cartCountSpans = document.querySelectorAll('#cartCount, #cartCountMobile, .nav-cart-counter, .cart-badge-counter');
     cartCountSpans.forEach(span => {
-        if (span) span.textContent = count;
+        if (span) {
+            span.textContent = count;
+            // Optionally hide or style when count is 0
+            if (span.classList.contains('nav-cart-counter')) {
+                span.style.display = count > 0 ? 'inline-block' : 'none';
+            }
+            if (animate) {
+                span.classList.add('bump');
+                setTimeout(() => span.classList.remove('bump'), 300);
+            }
+        }
     });
+
+    if (animate) {
+        document.querySelectorAll('.nav-cart-btn, .cart-badge').forEach(el => {
+            el.classList.add('bump');
+            setTimeout(() => el.classList.remove('bump'), 300);
+        });
+    }
 }
 
 function showCart() {
@@ -976,6 +975,7 @@ function updateQuantity(index, newQuantity) {
     if (cart[index]) {
         cart[index].quantity = newQuantity;
         localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartCount(true);
         displayCart();
     }
 }
@@ -984,6 +984,7 @@ function removeItem(index) {
     cart = JSON.parse(localStorage.getItem('cart')) || [];
     cart.splice(index, 1);
     localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartCount(true);
     displayCart();
 }
 
@@ -1523,5 +1524,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (document.getElementById('customStickerQtyInput')) {
         updateCustomStickerUI();
+    }
+});
+
+// Sync cart counter across browser tabs in real time
+window.addEventListener('storage', (e) => {
+    if (e.key === 'cart') {
+        updateCartCount(true);
+        if (document.getElementById('cartContent') && typeof displayCart === 'function') {
+            displayCart();
+        }
     }
 });

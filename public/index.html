@@ -74,6 +74,12 @@
                     <button type="button" class="lang-btn px-2.5 py-1 rounded-full" data-lang="en" onclick="setLanguage('en')">EN</button>
                 </div>
 
+                <!-- Dedicated Top Bar Cart Icon (Desktop & Mobile) -->
+                <a href="/cart" class="nav-cart-btn" aria-label="Shopping Cart" title="عربة التسوق">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="nav-cart-counter cart-badge-counter">0</span>
+                </a>
+
                 <!-- Auth Buttons (Guest) -->
                 <div class="hidden sm:flex items-center gap-2" id="authButtons">
                     <button class="btn-hover border border-white/70 hover:border-white hover:bg-white/10 text-white px-4 py-1.5 rounded-full text-sm font-semibold transition" onclick="showLoginModal()" data-i18n="login">دخول</button>

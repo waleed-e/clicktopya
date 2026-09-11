@@ -5,6 +5,9 @@ const orderSchema = new mongoose.Schema({
   customerName: { type: String, default: '' },
   customerPhone: { type: String, default: '' },
   customerAddress: { type: String, default: '' },
+  governorate: { type: String, default: '' },
+  city: { type: String, default: '' },
+  detailedAddress: { type: String, default: '' },
   items: [{
     productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: false, default: null },
     name: String,

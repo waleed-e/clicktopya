@@ -1100,6 +1100,93 @@ function displayCart() {
     updateCartCount();
 }
 
+// ============= Egyptian Locations Handler for Checkout =============
+const EGYPT_GOVS_LIST = (typeof EGYPT_GOVERNORATES !== 'undefined') ? EGYPT_GOVERNORATES : [
+    { name: "القاهرة", cities: ["مدينة نصر", "المعادي", "التجمع الخامس / القاهرة الجديدة", "مصر الجديدة", "الزمالك", "شبرا", "وسط البلد", "حلوان", "المقطم", "عين شمس", "النزهة", "الشروق", "بدر", "مدينتي", "الرحاب", "المستقبل", "حدائق القبة", "الوايلي", "العباسية", "المطرية", "المرج"] },
+    { name: "الجيزة", cities: ["الدقي", "المهندسين", "6 أكتوبر", "الشيخ زايد", "الهرم", "فيصل", "العجوزة", "العمرانية", "الوراق", "إمبابة", "الحوامدية", "البدرشين", "حدائق الأهرام"] },
+    { name: "الإسكندرية", cities: ["سموحة", "سيدي جابر", "الإبراهيمية", "لوران", "سان ستيفانو", "المنشية", "العجمي", "ميامي", "سيدي بشر", "المعمورة", "المنتزه", "كفر عبده", "برج العرب"] },
+    { name: "القليوبية", cities: ["بنها", "شبرا الخيمة", "قليوب", "القناطر الخيرية", "طوخ", "الخانكة", "كفر شكر", "العبور", "قها"] },
+    { name: "الدقهلية", cities: ["المنصورة", "ميت غمر", "السنبلاوين", "دكرنس", "بلقاس", "أجا", "شربين", "المنزلة", "طلخا"] },
+    { name: "الشرقية", cities: ["الزقازيق", "العاشر من رمضان", "بلبيس", "منيا القمح", "فاقوس", "أبو حماد", "ديرب نجم"] },
+    { name: "المنوفية", cities: ["شبين الكوم", "قويسنا", "بركة السبع", "تلا", "منوف", "أشمون", "السادات"] },
+    { name: "الغربية", cities: ["طنطا", "المحلة الكبرى", "كفر الزيات", "زفتى", "سمنود", "قطور", "بسيون"] },
+    { name: "كفر الشيخ", cities: ["كفر الشيخ", "دسوق", "فوه", "مطوبس", "بيلا", "الحامول", "بلطيم"] },
+    { name: "البحيرة", cities: ["دمنهور", "كفر الدوار", "رشيد", "إدكو", "أبو حمص", "إيتاي البارود", "حوش عيسى", "كوم حمادة"] },
+    { name: "دمياط", cities: ["دمياط", "رأس البر", "دمياط الجديدة", "كفر سعد", "فارسكور", "الزرقا"] },
+    { name: "بورسعيد", cities: ["حي الشرق", "حي العرب", "حي المناخ", "حي الضواحي", "حي الزهور", "بورفؤاد"] },
+    { name: "الإسماعيلية", cities: ["الإسماعيلية", "فايد", "القنطرة غرب", "القنطرة شرق", "التل الكبير", "القصاصين"] },
+    { name: "السويس", cities: ["حي السويس", "حي الأربعين", "حي فيصل", "حي عتاقة", "حي الجناين", "العين السخنة"] },
+    { name: "بني سويف", cities: ["بني سويف", "الواسطى", "ناصر", "ببا", "الفشن", "سمسطا", "إهناسيا"] },
+    { name: "الفيوم", cities: ["الفيوم", "سنورس", "إطسا", "طامية", "يوسف الصديق", "أبشواي"] },
+    { name: "المنيا", cities: ["المنيا", "مغاغة", "بني مزار", "مطاي", "سمالوط", "أبو قرقاص", "ملوي"] },
+    { name: "أسيوط", cities: ["أسيوط", "ديروط", "القوصية", "أبنوب", "منفلوط", "الفتح", "أبو تيج"] },
+    { name: "سوهاج", cities: ["سوهاج", "أخميم", "طهطا", "طما", "المراغة", "جرجا", "المنشأة", "البلينا"] },
+    { name: "قنا", cities: ["قنا", "نجع حمادي", "دشنا", "قوص", "فرشوط", "أبو تشت", "فقط"] },
+    { name: "الأقصر", cities: ["الأقصر", "إسنا", "أرمنت", "القرنة", "الطود", "البياضية"] },
+    { name: "أسوان", cities: ["أسوان", "كوم أمبو", "إدفو", "نصر النوبة", "دراو", "أبو سمبل"] },
+    { name: "البحر الأحمر", cities: ["الغردقة", "الجونة", "سفاجا", "القصير", "مرسى علم", "رأس غارب"] },
+    { name: "جنوب سيناء", cities: ["شرم الشيخ", "دهب", "نويبع", "طابا", "طور سيناء", "رأس سدر"] },
+    { name: "شمال سيناء", cities: ["العريش", "رفح", "الشيخ زويد", "بئر العبد"] },
+    { name: "مطروح", cities: ["مرسى مطروح", "العلمين", "الساحل الشمالي", "الحمام", "الضبعة", "سيوة"] },
+    { name: "الوادي الجديد", cities: ["الخارجة", "الداخلة", "الفرافرة", "باريس"] }
+];
+
+function populateGovernorates() {
+    const govSelect = document.getElementById('customerGovernorate');
+    if (!govSelect) return;
+    if (govSelect.options.length > 1) return;
+
+    const list = (typeof EGYPT_GOVERNORATES !== 'undefined') ? EGYPT_GOVERNORATES : EGYPT_GOVS_LIST;
+    list.forEach(gov => {
+        const opt = document.createElement('option');
+        opt.value = gov.name;
+        opt.textContent = gov.name;
+        govSelect.appendChild(opt);
+    });
+}
+
+function onGovernorateChange(govName) {
+    const citySelect = document.getElementById('customerCity');
+    if (!citySelect) return;
+
+    citySelect.innerHTML = '<option value="" disabled selected>اختر المدينة / المنطقة...</option>';
+    citySelect.disabled = true;
+
+    const list = (typeof EGYPT_GOVERNORATES !== 'undefined') ? EGYPT_GOVERNORATES : EGYPT_GOVS_LIST;
+    const foundGov = list.find(g => g.name === govName);
+
+    if (foundGov && foundGov.cities && foundGov.cities.length) {
+        foundGov.cities.forEach(city => {
+            const opt = document.createElement('option');
+            opt.value = city;
+            opt.textContent = city;
+            citySelect.appendChild(opt);
+        });
+        citySelect.disabled = false;
+    }
+
+    syncCompositeAddress();
+}
+
+function onCityChange() {
+    syncCompositeAddress();
+}
+
+function syncCompositeAddress() {
+    const gov = document.getElementById('customerGovernorate')?.value || '';
+    const city = document.getElementById('customerCity')?.value || '';
+    const detail = document.getElementById('customerDetailedAddress')?.value || '';
+    const hiddenAddr = document.getElementById('customerAddress');
+
+    if (hiddenAddr) {
+        const parts = [];
+        if (gov) parts.push(gov);
+        if (city) parts.push(city);
+        if (detail.trim()) parts.push(detail.trim());
+        hiddenAddr.value = parts.join(' - ');
+    }
+}
+
 function openCheckoutModal() {
     cart = JSON.parse(localStorage.getItem('cart')) || [];
     if (!cart.length) {
@@ -1111,6 +1198,7 @@ function openCheckoutModal() {
         showToast(t('checkoutRequired'), 'error');
         return;
     }
+    populateGovernorates();
     const user = JSON.parse(localStorage.getItem('user') || 'null');
     if (user && user.name) {
         const nameInput = document.getElementById('customerName');
@@ -1140,10 +1228,24 @@ async function submitGuestOrder(event) {
 
     const customerName = (document.getElementById('customerName')?.value || '').trim();
     const customerPhone = (document.getElementById('customerPhone')?.value || '').trim();
-    const customerAddress = (document.getElementById('customerAddress')?.value || '').trim();
+    const governorate = (document.getElementById('customerGovernorate')?.value || '').trim();
+    const city = (document.getElementById('customerCity')?.value || '').trim();
+    const detailedAddress = (document.getElementById('customerDetailedAddress')?.value || '').trim();
+
+    syncCompositeAddress();
+    let customerAddress = (document.getElementById('customerAddress')?.value || '').trim();
+
+    if (!customerAddress && (governorate || city || detailedAddress)) {
+        customerAddress = [governorate, city, detailedAddress].filter(Boolean).join(' - ');
+    }
 
     if (!customerName || !customerPhone || !customerAddress) {
-        showToast(t('checkoutRequired'), 'error');
+        showToast('يرجى استكمال جميع بيانات التوصيل (الاسم، الموبايل، والعنوان)', 'error');
+        return;
+    }
+
+    if (document.getElementById('customerGovernorate') && (!governorate || !city || !detailedAddress)) {
+        showToast('يرجى اختيار المحافظة والمدينة وكتابة العنوان بالتفصيل', 'error');
         return;
     }
 
@@ -1178,6 +1280,9 @@ async function submitGuestOrder(event) {
                 customerName,
                 customerPhone,
                 customerAddress,
+                governorate,
+                city,
+                detailedAddress,
                 items: cart.map((item) => ({
                     productId: item.productId,
                     name: item.name,

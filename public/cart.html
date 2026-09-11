@@ -174,15 +174,45 @@
                     <input type="tel" id="customerPhone" required placeholder="مثال: 01012345678" dir="ltr" class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm text-end focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition bg-slate-50 focus:bg-white">
                 </div>
 
-                <!-- Customer Address -->
+                <!-- Location: Governorate & City Cascading Dropdowns -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- Governorate -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1" for="customerGovernorate">
+                            <i class="fas fa-map-marked-alt text-red-500 me-1"></i>
+                            <span>المحافظة</span>
+                            <span class="text-red-500">*</span>
+                        </label>
+                        <select id="customerGovernorate" required class="w-full border border-slate-200 rounded-2xl px-3 py-3 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition bg-slate-50 focus:bg-white" onchange="onGovernorateChange(this.value)">
+                            <option value="" disabled selected>اختر المحافظة...</option>
+                        </select>
+                    </div>
+
+                    <!-- City / Area -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1" for="customerCity">
+                            <i class="fas fa-city text-red-500 me-1"></i>
+                            <span>المدينة / المنطقة</span>
+                            <span class="text-red-500">*</span>
+                        </label>
+                        <select id="customerCity" required disabled class="w-full border border-slate-200 rounded-2xl px-3 py-3 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition bg-slate-50 focus:bg-white disabled:bg-slate-100 disabled:text-slate-400" onchange="onCityChange(this.value)">
+                            <option value="" disabled selected>اختر المحافظة أولاً...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Customer Detailed Address -->
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1" for="customerAddress">
-                        <i class="fas fa-map-marker-alt text-red-500 me-1"></i>
-                        <span data-i18n="customerAddress">العنوان بالتفصيل</span>
+                    <label class="block text-xs font-bold text-slate-700 mb-1" for="customerDetailedAddress">
+                        <i class="fas fa-home text-red-500 me-1"></i>
+                        <span>العنوان التفصيلي</span>
                         <span class="text-red-500">*</span>
                     </label>
-                    <textarea id="customerAddress" required rows="3" placeholder="المحافظة، المدينة، اسم الشارع، رقم العمارة والشقة" class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition bg-slate-50 focus:bg-white resize-none"></textarea>
+                    <textarea id="customerDetailedAddress" required rows="2" placeholder="اسم الشارع، رقم العمارة، الدور، رقم الشقة، علامة مميزة بجوارك" class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition bg-slate-50 focus:bg-white resize-none" oninput="syncCompositeAddress()"></textarea>
                 </div>
+
+                <!-- Hidden Backwards-Compatible Full Address Field -->
+                <input type="hidden" id="customerAddress" name="customerAddress">
 
                 <!-- Payment Note -->
                 <div class="bg-amber-50 border border-amber-200/70 rounded-2xl p-3 flex items-start gap-2 text-xs text-amber-800">
@@ -264,6 +294,7 @@
 
     <!-- Scripts -->
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script src="/data/egypt-locations.js"></script>
     <script src="/script.js"></script>
 </body>
 </html>

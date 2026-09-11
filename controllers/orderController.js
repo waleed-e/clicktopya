@@ -6,7 +6,7 @@ const { normalizeEgyptianPhone } = require('../utils/validation');
 
 exports.create = async (req, res) => {
   try {
-    const { items, customerName, customerPhone, customerAddress } = req.body;
+    const { items, customerName, customerPhone, customerAddress, governorate, city, detailedAddress } = req.body;
 
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ message: 'Cart is empty' });
@@ -14,7 +14,17 @@ exports.create = async (req, res) => {
 
     const name = (customerName || '').trim();
     const rawPhone = (customerPhone || '').trim();
-    const address = (customerAddress || '').trim();
+    const gov = (governorate || '').trim();
+    const cty = (city || '').trim();
+    const detail = (detailedAddress || '').trim();
+    
+    // Construct address: either from structured fields or fallback to customerAddress
+    let address = (customerAddress || '').trim();
+    if (!address && (gov || cty || detail)) {
+      address = [gov, cty, detail].filter(Boolean).join(' - ');
+    } else if (gov && cty && detail && !address.includes(gov)) {
+      address = `${gov} - ${cty} - ${detail}`;
+    }
 
     if (!name || !rawPhone || !address) {
       return res.status(400).json({
@@ -110,6 +120,9 @@ exports.create = async (req, res) => {
       customerName: name,
       customerPhone: phone,
       customerAddress: address,
+      governorate: gov,
+      city: cty,
+      detailedAddress: detail,
       items: orderItems,
       totalPrice,
     });

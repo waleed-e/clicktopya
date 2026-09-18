@@ -552,15 +552,94 @@ function closeRegister() { closeRegisterModal(); }
 // ============= Products Functions =============
 function renderProductSkeleton() {
     return Array.from({ length: 8 }).map(() => `
-        <div class="rounded-xl sm:rounded-3xl bg-white shadow-sm border border-slate-200/70 overflow-hidden">
+        <div class="rounded-2xl sm:rounded-3xl bg-white shadow-sm border border-slate-200/70 overflow-hidden">
             <div class="aspect-square skeleton-shimmer"></div>
-            <div class="p-2 sm:p-5 space-y-2">
-                <div class="h-3 sm:h-5 skeleton-shimmer rounded-full w-3/4"></div>
-                <div class="h-2.5 sm:h-4 skeleton-shimmer rounded-full w-1/2"></div>
-                <div class="h-6 sm:h-10 skeleton-shimmer rounded-lg sm:rounded-full mt-2 sm:mt-4"></div>
+            <div class="p-4 space-y-2">
+                <div class="h-4 skeleton-shimmer rounded-full w-3/4"></div>
+                <div class="h-3 skeleton-shimmer rounded-full w-1/2"></div>
+                <div class="h-9 skeleton-shimmer rounded-full mt-3"></div>
             </div>
         </div>
     `).join('');
+}
+
+function renderProductSwiperSkeleton() {
+    return Array.from({ length: 3 }).map(() => `
+        <div class="swiper-slide">
+            <div class="product-swiper-card bg-white rounded-3xl overflow-hidden border border-slate-200/70 shadow-sm">
+                <div class="card-img-wrap aspect-[16/5] md:aspect-[2/3] min-h-[220px] skeleton-shimmer"></div>
+                <div class="card-info-bar p-4 space-y-3">
+                    <div class="h-5 skeleton-shimmer rounded-full w-3/4"></div>
+                    <div class="flex items-center justify-between pt-2">
+                        <div class="h-6 skeleton-shimmer rounded-full w-1/4"></div>
+                        <div class="h-8 skeleton-shimmer rounded-full w-1/3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+let productSwiperInstance = null;
+
+function initProductSwiper() {
+    const swiperEl = document.getElementById('mobileProductsSwiper');
+    if (!swiperEl || typeof Swiper === 'undefined') return;
+
+    if (productSwiperInstance) {
+        try {
+            productSwiperInstance.destroy(true, true);
+        } catch (e) {
+            console.warn('Error destroying swiper instance:', e);
+        }
+        productSwiperInstance = null;
+    }
+
+    productSwiperInstance = new Swiper(swiperEl, {
+        slidesPerView: 'auto',
+        spaceBetween: 14,
+        centeredSlides: false,
+        grabCursor: true,
+        watchOverflow: true,
+        navigation: {
+            nextEl: swiperEl.querySelector('.swiper-button-next'),
+            prevEl: swiperEl.querySelector('.swiper-button-prev'),
+        },
+        breakpoints: {
+            640: {
+                slidesPerView: 2.15,
+                spaceBetween: 16
+            },
+            768: {
+                slidesPerView: 3,
+                spaceBetween: 20
+            }
+        }
+    });
+}
+
+function handleBottomNavAccount() {
+    const token = localStorage.getItem('token');
+    if (token) {
+        window.location.href = '/orders';
+    } else {
+        showLoginModal();
+    }
+}
+
+function updateBottomNavActive() {
+    const path = window.location.pathname;
+    const items = document.querySelectorAll('.bottom-mobile-nav .bnav-item');
+    items.forEach(el => el.classList.remove('active'));
+    if (path === '/' || path === '/index.html') {
+        document.querySelector('.bottom-mobile-nav .bnav-home')?.classList.add('active');
+    } else if (path.startsWith('/products') || path.startsWith('/product')) {
+        document.querySelector('.bottom-mobile-nav .bnav-store')?.classList.add('active');
+    } else if (path.startsWith('/cart')) {
+        document.querySelector('.bottom-mobile-nav .bnav-cart')?.classList.add('active');
+    } else if (path.startsWith('/orders')) {
+        document.querySelector('.bottom-mobile-nav .bnav-account')?.classList.add('active');
+    }
 }
 
 function getCategoryFromURL() {
@@ -605,7 +684,9 @@ async function updateCategoryFilter(selectedCategoryName = '') {
 
 async function loadProducts(categoryOverride = null) {
     const grid = document.getElementById('productsGrid');
+    const swiperTrack = document.getElementById('productsSwiperTrack');
     if (grid) grid.innerHTML = renderProductSkeleton();
+    if (swiperTrack) swiperTrack.innerHTML = renderProductSwiperSkeleton();
 
     const selectedCategory = categoryOverride !== null ? categoryOverride : getCategoryFromURL();
     const categoryTitle = document.getElementById('categoryTitle');
@@ -633,71 +714,117 @@ async function loadProducts(categoryOverride = null) {
         await updateCategoryFilter(selectedCategory || '');
     } catch (error) {
         console.error('Error loading products:', error);
-        if (grid) {
-            grid.innerHTML = `
-                <div class="col-span-full text-center py-16 bg-white rounded-3xl border border-rose-100 shadow-sm">
-                    <i class="fas fa-circle-exclamation text-4xl text-rose-500 mb-3"></i>
-                    <p class="text-rose-600 font-bold text-lg mb-4">${t('loadError')}</p>
-                    <button class="btn-hover bg-red-600 text-white px-6 py-2 rounded-full font-bold text-sm" onclick="loadProducts()">إعادة المحاولة</button>
-                </div>
-            `;
-        }
+        const errHtml = `
+            <div class="col-span-full text-center py-16 bg-white rounded-3xl border border-rose-100 shadow-sm">
+                <i class="fas fa-circle-exclamation text-4xl text-rose-500 mb-3"></i>
+                <p class="text-rose-600 font-bold text-lg mb-4">${t('loadError')}</p>
+                <button class="btn-hover bg-red-600 text-white px-6 py-2 rounded-full font-bold text-sm" onclick="loadProducts()">إعادة المحاولة</button>
+            </div>
+        `;
+        if (grid) grid.innerHTML = errHtml;
+        if (swiperTrack) swiperTrack.innerHTML = errHtml;
     }
 }
 
 function displayProducts(productsToShow) {
     const grid = document.getElementById('productsGrid');
-    if (!grid) return;
+    const swiperTrack = document.getElementById('productsSwiperTrack');
+    if (!grid && !swiperTrack) return;
 
     if (!productsToShow.length) {
-        grid.innerHTML = `
+        const emptyHtml = `
             <div class="col-span-full text-center py-16 bg-white rounded-3xl border border-slate-200 shadow-sm">
                 <i class="fas fa-box-open text-5xl text-slate-300 mb-3"></i>
                 <p class="text-slate-500 font-bold text-lg">${t('noProducts')}</p>
             </div>
         `;
+        if (grid) grid.innerHTML = emptyHtml;
+        if (swiperTrack) swiperTrack.innerHTML = emptyHtml;
         return;
     }
 
-    grid.innerHTML = productsToShow.map((product, index) => {
-        const isAvailable = product.Quantity > 0;
-        const categoryName = product.cat_id?.name || '';
-        const img = product.imgpath || '/logo.png';
-        const isSticker = categoryName.toLowerCase().includes('sticker') || product.name.includes('استيكر');
+    // 1. Render Desktop Grid
+    if (grid) {
+        grid.innerHTML = productsToShow.map((product, index) => {
+            const isAvailable = product.Quantity > 0;
+            const categoryName = product.cat_id?.name || '';
+            const img = product.imgpath || '/logo.png';
+            const isSticker = categoryName.toLowerCase().includes('sticker') || product.name.includes('استيكر');
 
-        return `
-            <article class="product-card card-enter group bg-white rounded-2xl sm:rounded-3xl overflow-hidden border ${isSticker ? 'border-red-200/90 shadow-red-500/5' : 'border-slate-200/80'} shadow-sm flex flex-col justify-between" style="animation-delay:${index * 35}ms">
-                <a href="/products/${product._id}" class="card-media block relative overflow-hidden bg-slate-50 aspect-square flex items-center justify-center p-1 sm:p-4">
-                    <img src="${img}" alt="${product.name}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" onerror="this.src='/logo.png'">
-                    ${categoryName ? `<span class="hidden sm:inline-block absolute top-3 start-3 ${isSticker ? 'bg-red-600 text-white' : 'bg-white/95 text-slate-700'} text-xs font-black px-2.5 py-1 rounded-full shadow-sm">${categoryName}</span>` : ''}
-                    ${isSticker ? '<span class="hidden sm:inline-block absolute top-3 end-3 bg-amber-400 text-slate-900 text-[10px] font-black px-2 py-0.5 rounded-md shadow-xs">فينيل ضد الماء</span>' : ''}
-                </a>
-                <div class="card-body p-2 sm:p-5 flex flex-col flex-grow justify-between text-start">
-                    <div>
-                        <h3 class="card-title text-xs sm:text-base font-extrabold text-slate-800 mb-1 line-clamp-2 hover:text-red-600 transition">
-                            <a href="/products/${product._id}">${product.name}</a>
-                        </h3>
-                        <div class="flex items-center justify-between my-1 sm:my-2">
-                            <span class="card-price text-xs sm:text-xl font-black text-red-600">${formatPrice(product.price)}</span>
-                            <span class="hidden sm:inline-block text-xs font-bold px-2 py-0.5 rounded-full ${isAvailable ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-rose-50 text-rose-600 border border-rose-100'}">
-                                ${isAvailable ? t('inStock') : t('outOfStock')}
-                            </span>
+            return `
+                <article class="product-card card-enter group bg-white rounded-3xl overflow-hidden border ${isSticker ? 'border-red-200/90 shadow-red-500/5' : 'border-slate-200/80'} shadow-sm flex flex-col justify-between" style="animation-delay:${index * 35}ms">
+                    <a href="/products/${product._id}" class="card-media block relative overflow-hidden bg-slate-50 aspect-square flex items-center justify-center p-4">
+                        <img src="${img}" alt="${product.name}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" onerror="this.src='/logo.png'">
+                        ${categoryName ? `<span class="hidden sm:inline-block absolute top-3 start-3 ${isSticker ? 'bg-red-600 text-white' : 'bg-white/95 text-slate-700'} text-xs font-black px-2.5 py-1 rounded-full shadow-sm">${categoryName}</span>` : ''}
+                        ${isSticker ? '<span class="hidden sm:inline-block absolute top-3 end-3 bg-amber-400 text-slate-900 text-[10px] font-black px-2 py-0.5 rounded-md shadow-xs">فينيل ضد الماء</span>' : ''}
+                    </a>
+                    <div class="card-body p-4 sm:p-5 flex flex-col flex-grow justify-between text-start">
+                        <div>
+                            <h3 class="card-title text-sm sm:text-base font-extrabold text-slate-800 mb-1 line-clamp-2 hover:text-red-600 transition">
+                                <a href="/products/${product._id}">${product.name}</a>
+                            </h3>
+                            <div class="flex items-center justify-between my-2">
+                                <span class="card-price text-sm sm:text-xl font-black text-red-600">${formatPrice(product.price)}</span>
+                                <span class="hidden sm:inline-block text-xs font-bold px-2 py-0.5 rounded-full ${isAvailable ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-rose-50 text-rose-600 border border-rose-100'}">
+                                    ${isAvailable ? t('inStock') : t('outOfStock')}
+                                </span>
+                            </div>
+                        </div>
+                        <button class="card-btn btn-hover mt-3 w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-red-600/20 flex items-center justify-center gap-1.5 transition" onclick="addToCart('${product._id}')" title="${t('addToCart')}">
+                            <i class="fas fa-cart-plus text-xs sm:text-sm"></i>
+                            <span>${t('addToCart')}</span>
+                        </button>
+                    </div>
+                </article>
+            `;
+        }).join('');
+    }
+
+    // 2. Render Mobile Swiper Slides (matching the reference layout)
+    if (swiperTrack) {
+        swiperTrack.innerHTML = productsToShow.map((product) => {
+            const isAvailable = product.Quantity > 0;
+            const categoryName = product.cat_id?.name || '';
+            const img = product.imgpath || '/logo.png';
+            const isSticker = categoryName.toLowerCase().includes('sticker') || product.name.includes('استيكر');
+
+            return `
+                <div class="swiper-slide">
+                    <div class="product-swiper-card group bg-white rounded-3xl overflow-hidden border border-slate-200/90 shadow-md flex flex-col justify-between h-full relative">
+                        <!-- Image area: large, clear, filling card with aspect ratio -->
+                        <a href="/products/${product._id}" class="card-img-wrap aspect-[16/5] md:aspect-[2/3] block relative overflow-hidden bg-slate-50 w-full flex items-center justify-center p-3">
+                            <img src="${img}" alt="${product.name}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" onerror="this.src='/logo.png'">
+                            ${categoryName ? `<span class="category-badge">${categoryName}</span>` : ''}
+                            ${isSticker ? `<span class="stock-badge bg-amber-400 text-slate-900">فينيل ضد الماء</span>` : (isAvailable ? `<span class="stock-badge text-emerald-600">${t('inStock')}</span>` : `<span class="stock-badge text-rose-600">${t('outOfStock')}</span>`)}
+                        </a>
+                        <!-- White bar directly below the image inside the same card -->
+                        <div class="card-info-bar bg-white p-4 flex flex-col justify-between flex-grow">
+                            <div>
+                                <h3 class="product-name font-bold text-base text-slate-800 mb-1 hover:text-red-600 transition">
+                                    <a href="/products/${product._id}">${product.name}</a>
+                                </h3>
+                            </div>
+                            <div class="price-row flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
+                                <span class="product-price text-xl font-black text-red-600">${formatPrice(product.price)}</span>
+                                <button class="add-btn btn-hover bg-red-600 hover:bg-red-700 text-white py-2 px-5 rounded-full font-bold text-sm shadow-md shadow-red-600/20 flex items-center gap-2 transition" onclick="addToCart('${product._id}')" title="${t('addToCart')}">
+                                    <i class="fas fa-cart-plus text-xs"></i>
+                                    <span>${t('addToCart')}</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    <button class="card-btn btn-hover mt-1.5 sm:mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-1.5 sm:py-2.5 px-2 sm:px-4 rounded-xl sm:rounded-full font-bold text-xs sm:text-sm shadow-md shadow-red-600/20 flex items-center justify-center gap-1.5 transition" onclick="addToCart('${product._id}')" title="${t('addToCart')}">
-                        <i class="fas fa-cart-plus text-xs sm:text-sm"></i>
-                        <span class="hidden sm:inline">${t('addToCart')}</span>
-                        <span class="sm:hidden text-[10px]">أضف</span>
-                    </button>
                 </div>
-            </article>
-        `;
-    }).join('');
+            `;
+        }).join('');
+
+        initProductSwiper();
+    }
 
     if (typeof AOS !== 'undefined') {
         AOS.refresh();
     }
 }
+
 
 async function filterByCategory() {
     const categoryName = document.getElementById('categoryFilter')?.value || '';
@@ -1717,6 +1844,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupNavbarScroll();
     checkUserStatus();
     updateCartCount();
+    updateBottomNavActive();
 
     if (typeof AOS !== 'undefined') {
         AOS.init({
@@ -1727,7 +1855,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (document.getElementById('productsGrid')) {
+    if (document.getElementById('productsGrid') || document.getElementById('productsSwiperTrack')) {
         loadProducts();
     }
     if (document.getElementById('latestOffersGrid')) {
@@ -1743,6 +1871,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCustomStickerUI();
     }
 });
+
 
 // Sync cart counter across browser tabs in real time
 window.addEventListener('storage', (e) => {

@@ -32,11 +32,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- AOS CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/style.css">
 </head>
+
 <body class="font-sans bg-slate-50 text-slate-800 pt-20 flex flex-col min-h-screen">
     <!-- Navbar -->
     <nav id="siteNavbar" class="navbar">
@@ -421,10 +422,23 @@
                 </div>
             </div>
 
-            <!-- Products Grid Container -->
-            <div class="grid grid-cols-4 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-6 md:gap-8" id="productsGrid">
+            <!-- Products Swiper Container (Mobile < md) -->
+            <div class="block md:hidden products-swiper-wrapper relative overflow-hidden">
+                <div class="swiper products-swiper" id="mobileProductsSwiper">
+                    <div class="swiper-wrapper" id="productsSwiperTrack">
+                        <!-- Skeletons / products injected via script.js -->
+                    </div>
+                    <!-- Navigation arrows vertically centered on image -->
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-button-next"></div>
+                </div>
+            </div>
+
+            <!-- Products Grid (Desktop >= md) -->
+            <div class="hidden md:grid md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8" id="productsGrid">
                 <!-- Skeleton loader injected dynamically by script.js -->
             </div>
+
         </div>
     </main>
 
@@ -555,8 +569,36 @@
         </div>
     </footer>
 
+    <!-- Fixed Bottom Mobile Navigation Bar -->
+    <nav class="bottom-mobile-nav" id="bottomMobileNav" aria-label="Bottom Navigation">
+        <a href="/" class="bnav-item bnav-home active" id="bnavHome">
+            <i class="fas fa-home"></i>
+            <span>الرئيسية</span>
+        </a>
+        <a href="/products" class="bnav-item bnav-store" id="bnavStore">
+            <i class="fas fa-store"></i>
+            <span>المتجر</span>
+        </a>
+        <a href="/cart" class="bnav-item bnav-cart" id="bnavCart">
+            <i class="fas fa-shopping-cart"></i>
+            <span>السلة</span>
+            <span class="bnav-cart-badge cart-badge-counter">0</span>
+        </a>
+        <a href="javascript:void(0)" onclick="handleBottomNavAccount()" class="bnav-item bnav-account" id="bnavAccount">
+            <i class="fas fa-user"></i>
+            <span>حسابي</span>
+        </a>
+        <a href="javascript:void(0)" onclick="toggleMobileNav()" class="bnav-item bnav-menu" id="bnavMenu">
+            <i class="fas fa-bars"></i>
+            <span>القائمة</span>
+        </a>
+    </nav>
+
     <!-- Scripts -->
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="/script.js"></script>
 </body>
 </html>
+

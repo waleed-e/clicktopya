@@ -125,54 +125,13 @@ body {
     left: -4px;
 }
 
-/* ========================================================
-   Responsive 4-column Mobile Product Grid (25% per card)
-   ======================================================== */
-@media (max-width: 639px) {
-    #productsGrid {
-        display: grid !important;
-        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-        gap: 6px !important;
-    }
-
-    .product-card {
-        border-radius: 14px !important;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
-        border-width: 1px !important;
-    }
-
-    .product-card .card-media {
-        padding: 4px !important;
-        border-radius: 12px 12px 0 0 !important;
-    }
-
-    .product-card .card-body {
-        padding: 6px 4px 8px 4px !important;
-    }
-
-    .product-card .card-title {
-        font-size: 10.5px !important;
-        line-height: 1.25 !important;
-        height: 26px !important;
-        margin-bottom: 2px !important;
-        -webkit-line-clamp: 2 !important;
-        display: -webkit-box !important;
-        -webkit-box-orient: vertical !important;
-        overflow: hidden !important;
-    }
-
-    .product-card .card-price {
-        font-size: 11px !important;
-        font-weight: 900 !important;
-    }
-
-    .product-card .card-btn {
-        padding: 4px 6px !important;
-        font-size: 10px !important;
-        border-radius: 8px !important;
-        margin-top: 4px !important;
-    }
+/* Product Card Base Styles */
+.product-card {
+    border-radius: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 
 /* Modals */
 .modal {
@@ -749,4 +708,323 @@ body {
         grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     }
 }
+
+
+/* ========================================================
+   FIXED BOTTOM MOBILE NAVBAR
+   ======================================================== */
+.bottom-mobile-nav {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    z-index: 9999 !important;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: stretch;
+    height: 64px;
+    padding: 0 4px;
+}
+
+.bottom-mobile-nav .bnav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    text-decoration: none;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'Tajawal', sans-serif;
+    transition: color 0.15s ease;
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+    padding: 6px 2px 4px;
+}
+
+.bottom-mobile-nav .bnav-item i {
+    font-size: 19px;
+    line-height: 1;
+}
+
+.bottom-mobile-nav .bnav-item.active,
+.bottom-mobile-nav .bnav-item:active {
+    color: #dc2626;
+}
+
+.bottom-mobile-nav .bnav-item.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 3px;
+    background: #dc2626;
+    border-radius: 0 0 4px 4px;
+}
+
+.bottom-mobile-nav .bnav-cart-badge {
+    position: absolute;
+    top: 4px;
+    right: calc(50% - 18px);
+    background: #dc2626;
+    color: white;
+    font-size: 9px;
+    font-weight: 900;
+    min-width: 17px;
+    height: 17px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 3px;
+    line-height: 1;
+    border: 2px solid #fff;
+}
+
+/* Add bottom padding to body on mobile so bottom nav never overlaps */
+@media (max-width: 767px) {
+    body {
+        padding-bottom: 76px !important;
+    }
+}
+
+/* Hide bottom nav on md+ screens */
+@media (min-width: 768px) {
+    .bottom-mobile-nav {
+        display: none !important;
+    }
+}
+
+
+/* ========================================================
+   PRODUCT SWIPER CAROUSEL (Mobile)
+   ======================================================== */
+
+.products-swiper-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 4px 2px 16px 2px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.products-swiper {
+    position: relative;
+    width: 100%;
+    overflow: visible; /* allows peek effect */
+}
+
+/* Mobile: each slide takes nearly full screen width with small peek */
+@media (max-width: 767px) {
+    .products-swiper .swiper-slide {
+        width: 88vw !important;
+        max-width: 420px !important;
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+    }
+}
+
+/* Override Swiper navigation arrows: vertically centered on product image */
+.products-swiper .swiper-button-next,
+.products-swiper .swiper-button-prev {
+    color: #dc2626 !important;
+    background: rgba(255, 255, 255, 0.95);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    top: 38%; /* Vertically centered on the product image */
+    transform: translateY(-50%);
+    margin-top: 0;
+    z-index: 30;
+    transition: all 0.2s ease;
+}
+
+.products-swiper .swiper-button-next:hover,
+.products-swiper .swiper-button-prev:hover {
+    background: #dc2626;
+    color: #ffffff !important;
+    transform: translateY(-50%) scale(1.05);
+}
+
+.products-swiper .swiper-button-next::after,
+.products-swiper .swiper-button-prev::after {
+    font-size: 13px;
+    font-weight: 900;
+}
+
+[dir="rtl"] .products-swiper .swiper-button-next {
+    left: 10px;
+    right: auto;
+}
+[dir="rtl"] .products-swiper .swiper-button-prev {
+    right: 10px;
+    left: auto;
+}
+
+/* Mobile product swiper card */
+.product-swiper-card {
+    background: #ffffff;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #f1f5f9;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+
+/* Image container: large, clear, filling card */
+.product-swiper-card .card-img-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 5;
+    min-height: 220px; /* guarantees large and clear image on mobile */
+    background: #f8fafc;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (min-width: 768px) {
+    .product-swiper-card .card-img-wrap {
+        aspect-ratio: 2 / 3;
+        min-height: auto;
+    }
+}
+
+.product-swiper-card .card-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    padding: 10px;
+    transition: transform 0.35s ease;
+}
+
+.product-swiper-card:hover .card-img-wrap img {
+    transform: scale(1.04);
+}
+
+.product-swiper-card .card-img-wrap .stock-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    color: #dc2626;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.product-swiper-card .card-img-wrap .category-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: #dc2626;
+    color: white;
+    box-shadow: 0 2px 6px rgba(220,38,38,0.25);
+}
+
+/* White name bar directly below the image inside the same card */
+.product-swiper-card .card-info-bar {
+    background: #ffffff;
+    padding: 14px 16px 16px;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-grow: 1;
+    justify-content: space-between;
+}
+
+.product-swiper-card .card-info-bar .product-name {
+    font-family: 'Tajawal', sans-serif;
+    font-weight: 800;
+    font-size: 15px;
+    color: #1e293b;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    direction: rtl;
+    text-align: right;
+}
+
+.product-swiper-card .card-info-bar .price-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 2px;
+}
+
+.product-swiper-card .card-info-bar .product-price {
+    font-size: 18px;
+    font-weight: 900;
+    color: #dc2626;
+    font-family: 'Tajawal', sans-serif;
+}
+
+.product-swiper-card .card-info-bar .add-btn {
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 800;
+    font-family: 'Tajawal', sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 3px 10px rgba(220, 38, 38, 0.25);
+    transition: background 0.2s, transform 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.product-swiper-card .card-info-bar .add-btn:active {
+    background: #b91c1c;
+    transform: scale(0.97);
+}
+
+/* Desktop: hide swiper, show normal grid */
+@media (min-width: 768px) {
+    .products-swiper-wrapper {
+        display: none !important;
+    }
+    #productsGrid {
+        display: grid !important;
+    }
+}
+
+/* Mobile: hide normal grid when swiper is active */
+@media (max-width: 767px) {
+    #productsGrid.grid-hidden-mobile {
+        display: none !important;
+    }
+}
+
+
 

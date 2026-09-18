@@ -277,8 +277,35 @@
         </div>
     </footer>
 
+    <!-- Fixed Bottom Mobile Navigation Bar -->
+    <nav class="bottom-mobile-nav" id="bottomMobileNav" aria-label="Bottom Navigation">
+
+        <a href="/" class="bnav-item bnav-home" id="bnavHome">
+            <i class="fas fa-home"></i>
+            <span>الرئيسية</span>
+        </a>
+        <a href="/products" class="bnav-item bnav-store" id="bnavStore">
+            <i class="fas fa-store"></i>
+            <span>المتجر</span>
+        </a>
+        <a href="/cart" class="bnav-item bnav-cart" id="bnavCart">
+            <i class="fas fa-shopping-cart"></i>
+            <span>السلة</span>
+            <span class="bnav-cart-badge cart-badge-counter">0</span>
+        </a>
+        <a href="javascript:void(0)" onclick="handleBottomNavAccount()" class="bnav-item bnav-account active" id="bnavAccount">
+            <i class="fas fa-user"></i>
+            <span>حسابي</span>
+        </a>
+        <a href="javascript:void(0)" onclick="toggleMobileNav()" class="bnav-item bnav-menu" id="bnavMenu">
+            <i class="fas fa-bars"></i>
+            <span>القائمة</span>
+        </a>
+    </nav>
+
     <!-- Scripts -->
     <script src="/script.js"></script>
+
     <script>
         let loadedOrders = [];
 

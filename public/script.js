@@ -876,31 +876,26 @@ async function loadCategories() {
             // Skeleton cards replaced with real cards
             target.innerHTML = categories.map((cat, index) => {
                 const catImg = cat.image || '';
-                // Fallback gradient background when no image
-                const fallbackBg = !catImg
-                    ? 'background: linear-gradient(135deg,#fee2e2 0%,#fecaca 100%);'
-                    : '';
-                const fallbackIcon = !catImg
-                    ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:3rem;opacity:0.3;">
-                            <i class="fas fa-folder-open"></i>
-                       </div>`
-                    : '';
+
+                const catUrl = `/products?category=${encodeURIComponent(cat.name)}`;
+
 
                 return `
-                    <div class="cat-card" tabindex="0" role="button" aria-label="${cat.name}"
-                         onclick="goToCategoryProducts('${cat.name}')"
-                         onkeydown="if(event.key==='Enter')goToCategoryProducts('${cat.name}')"
-                         style="${fallbackBg}">
+                    <a class="cat-card" href="${catUrl}" aria-label="${cat.name}" tabindex="0">
                         ${catImg
                             ? `<img src="${catImg}" alt="${cat.name}" class="cat-card-img" loading="lazy"
-                                    onerror="this.style.display='none'">`
-                            : fallbackIcon}
+                                    onerror="this.style.display='none';this.nextElementSibling&&(this.nextElementSibling.style.display='flex')">`
+                            : ''}
+                        ${!catImg
+                            ? `<div class="cat-card-fallback"><i class="fas fa-tag"></i></div>`
+                            : `<div class="cat-card-fallback" style="display:none"><i class="fas fa-tag"></i></div>`}
                         <div class="cat-card-overlay"></div>
                         <div class="cat-card-pill">
                             <span class="cat-card-pill-name">${cat.name}</span>
                             <span class="cat-card-pill-icon"><i class="fas fa-chevron-left"></i></span>
                         </div>
-                    </div>
+                        <div class="cat-card-name">${cat.name}</div>
+                    </a>
                 `;
             }).join('');
 

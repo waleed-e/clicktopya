@@ -352,7 +352,7 @@ function setLanguage(lang) {
         displayProducts(products);
         updateCategoryFilter();
     }
-    if (document.getElementById('categoriesGrid')) {
+    if (document.getElementById('categoriesGrid') || document.getElementById('categoriesCarouselTrack')) {
         loadCategories();
     }
     if (document.getElementById('cartContent')) {
@@ -729,46 +729,154 @@ function sortProducts() {
 }
 
 async function loadCategories() {
-    const grid = document.getElementById('categoriesGrid');
+    // Support both #categoriesGrid (categories.html) and
+    // #categoriesCarouselTrack (index.html inline section)
+    const grid   = document.getElementById('categoriesGrid');
+    const track  = document.getElementById('categoriesCarouselTrack');
+    const target = grid || track;
+
     try {
         const res = await fetch(`${API_BASE}/categories`);
         const categories = await res.json();
         availableCategories = categories;
 
-        if (grid) {
+        if (target) {
             if (!Array.isArray(categories) || !categories.length) {
-                grid.innerHTML = `<div class="col-span-full text-center text-slate-500 py-12">${t('noProducts')}</div>`;
+                target.innerHTML = `<div class="col-span-full text-center text-slate-500 py-12">${t('noProducts')}</div>`;
                 return;
             }
-            grid.innerHTML = categories.map((cat, index) => {
-                const isStickerCat = cat.name.toLowerCase().includes('sticker') || cat.name.includes('استيكر');
+
+            // Skeleton cards replaced with real cards
+            target.innerHTML = categories.map((cat, index) => {
                 const catImg = cat.image || '';
+                // Fallback gradient background when no image
+                const fallbackBg = !catImg
+                    ? 'background: linear-gradient(135deg,#fee2e2 0%,#fecaca 100%);'
+                    : '';
+                const fallbackIcon = !catImg
+                    ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:3rem;opacity:0.3;">
+                            <i class="fas fa-folder-open"></i>
+                       </div>`
+                    : '';
 
                 return `
-                    <div class="category-card card-enter group bg-white rounded-3xl p-8 text-center shadow-sm border ${isStickerCat ? 'border-red-500 shadow-lg shadow-red-500/10 ring-2 ring-red-100 relative' : 'border-slate-200/80'} cursor-pointer transition hover:border-red-400" style="animation-delay:${index * 40}ms" onclick="goToCategoryProducts('${cat.name}')">
-                        ${isStickerCat ? '<div class="sticker-tape"></div><span class="absolute top-4 start-4 bg-red-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow"><i class="fas fa-star text-amber-300 me-1"></i> مميز</span>' : ''}
-                        <div class="w-16 h-16 ${isStickerCat ? 'bg-red-600 text-white scale-110' : 'bg-red-50 text-red-600'} group-hover:bg-red-600 group-hover:text-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl transition duration-300 shadow-sm overflow-hidden">
-                            ${catImg ? `<img src="${catImg}" alt="${cat.name}" class="w-full h-full object-cover">` : `<i class="fas ${isStickerCat ? 'fa-laptop-code' : 'fa-folder-open'}"></i>`}
+                    <div class="cat-card" tabindex="0" role="button" aria-label="${cat.name}"
+                         onclick="goToCategoryProducts('${cat.name}')"
+                         onkeydown="if(event.key==='Enter')goToCategoryProducts('${cat.name}')"
+                         style="${fallbackBg}">
+                        ${catImg
+                            ? `<img src="${catImg}" alt="${cat.name}" class="cat-card-img" loading="lazy"
+                                    onerror="this.style.display='none'">`
+                            : fallbackIcon}
+                        <div class="cat-card-overlay"></div>
+                        <div class="cat-card-pill">
+                            <span class="cat-card-pill-name">${cat.name}</span>
+                            <span class="cat-card-pill-icon"><i class="fas fa-chevron-left"></i></span>
                         </div>
-                        <h3 class="text-xl font-black text-slate-900 mb-2 group-hover:text-red-600 transition">${cat.name}</h3>
-                        <p class="text-slate-500 text-sm leading-relaxed">${cat.description || 'تصفح كافة منتجات هذا القسم'}</p>
-                        ${isStickerCat ? '<div class="mt-3 text-xs font-black text-red-600">يشمل: استيكرات لابتوب جاهزة ومخصصة</div>' : ''}
-                        <span class="inline-flex items-center gap-1 text-xs font-bold text-red-600 mt-4">
-                            تصفح المنتجات <i class="fas fa-arrow-left text-[10px]"></i>
-                        </span>
                     </div>
                 `;
             }).join('');
+
+            // On mobile, boot the auto-scroll behaviour
+            if (window.innerWidth < 768) {
+                initCategoryCarousel(target);
+            }
 
             if (typeof AOS !== 'undefined') AOS.refresh();
         }
     } catch (error) {
         console.error('Error loading categories:', error);
-        if (grid) {
-            grid.innerHTML = `<div class="col-span-full text-center text-rose-600 py-10 font-bold">${t('loadError')}</div>`;
+        if (target) {
+            target.innerHTML = `<div class="col-span-full text-center text-rose-600 py-10 font-bold">${t('loadError')}</div>`;
         }
     }
 }
+
+/**
+ * Initialise the mobile auto-scrolling carousel.
+ * @param {HTMLElement} track - The .cat-carousel-track element.
+ */
+function initCategoryCarousel(track) {
+    if (!track) return;
+    const cards = Array.from(track.querySelectorAll('.cat-card'));
+    if (cards.length < 2) return;
+
+    let currentIndex = 0;
+    let autoTimer = null;
+    let pauseTimer = null;
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartTranslate = 0;
+
+    function getCardWidth() {
+        const card = track.querySelector('.cat-card');
+        if (!card) return 180;
+        return card.offsetWidth + 14; // width + gap
+    }
+
+    function slideTo(index) {
+        const total = cards.length;
+        currentIndex = ((index % total) + total) % total;
+        const offset = currentIndex * getCardWidth();
+        // CSS transforms are always in physical pixel space (not affected by dir="rtl")
+        // Negative translateX scrolls the track left → revealing cards to the left (next card)
+        track.style.transform = `translateX(-${offset}px)`;
+    }
+
+    function startAuto() {
+        if (autoTimer) clearInterval(autoTimer);
+        autoTimer = setInterval(() => {
+            slideTo(currentIndex + 1);
+        }, 2200);
+    }
+
+    function pauseAuto(resumeDelay = 3000) {
+        clearInterval(autoTimer);
+        clearTimeout(pauseTimer);
+        pauseTimer = setTimeout(startAuto, resumeDelay);
+    }
+
+    // ── Touch / pointer drag support ──
+    track.addEventListener('pointerdown', (e) => {
+        isDragging = true;
+        dragStartX = e.clientX;
+        const match = (track.style.transform || '').match(/translateX\(([^)]+)px\)/);
+        dragStartTranslate = match ? parseFloat(match[1]) : 0;
+        track.setPointerCapture(e.pointerId);
+        pauseAuto(4000);
+        track.style.transition = 'none';
+    }, { passive: true });
+
+    track.addEventListener('pointermove', (e) => {
+        if (!isDragging) return;
+        const delta = e.clientX - dragStartX;
+        track.style.transform = `translateX(${dragStartTranslate + delta}px)`;
+    }, { passive: true });
+
+    function endDrag(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        track.style.transition = '';
+        const delta = e.clientX - dragStartX;
+        const threshold = getCardWidth() * 0.3;
+        if (delta < -threshold) {
+            slideTo(currentIndex + 1);
+        } else if (delta > threshold) {
+            slideTo(currentIndex - 1);
+        } else {
+            slideTo(currentIndex);
+        }
+    }
+
+    track.addEventListener('pointerup', endDrag, { passive: true });
+    track.addEventListener('pointercancel', endDrag, { passive: true });
+
+    // Init
+    slideTo(0);
+    startAuto();
+}
+
+
 
 function filterByCategoryName(categoryName) {
     window.location.href = `/products?category=${encodeURIComponent(categoryName)}`;
@@ -1624,6 +1732,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (document.getElementById('latestOffersGrid')) {
         loadLatestOffers();
+    }
+    if (document.getElementById('categoriesGrid') || document.getElementById('categoriesCarouselTrack')) {
+        loadCategories();
     }
     if (document.getElementById('cartContent') && typeof displayCart === 'function') {
         displayCart();
